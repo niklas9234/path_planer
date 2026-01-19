@@ -2,7 +2,7 @@
 
 Generated: 2026-01-19
 
-Progress: 0 / 2 done
+Progress: 0 / 1 done
 
 Legend: status = backlog | in_progress | done; prio = P0 (highest) .. P2
 
@@ -10,13 +10,13 @@ Legend: status = backlog | in_progress | done; prio = P0 (highest) .. P2
 
 | ID | Title | Area | Prio | Created | File |
 |---|---|---|---|---|---|
-| SO-002 | Ticket Createion Test | so | P1 | 2026-01-19 | [tickets/SO-002-ticket-createion-test.md](tickets/SO-002-ticket-createion-test.md) |
+| SO-001 | Neues Ticket mit auto Zahl Test | so | P1 | 2026-01-19 | [tickets/SO-001-neues-ticket-mit-auto-zahl-test.md](tickets/SO-001-neues-ticket-mit-auto-zahl-test.md) |
 
 ## In Progress
 
 | ID | Title | Area | Prio | Created | File |
 |---|---|---|---|---|---|
-| SO-1 | Ticket UI erstellen | sonstiges | P1 | 2026-01-19 | [tickets/SO-01-Ticket-ui-erstellen.md](tickets/SO-01-Ticket-ui-erstellen.md) |
+| _none_ |  |  |  |  |  |
 
 ## Done
 
