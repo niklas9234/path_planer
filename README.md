@@ -32,7 +32,7 @@ explicit interfaces.
 
 ### Architecture & Layer Diagram
 
-<img src="docs/diagrams/architecture.svg" style="max-width:50%;" alt="Architecture Diagram">
+<img src="docs/diagrams/architecture.svg" style="max-width:20%;" alt="Architecture Diagram">
 
 
 
