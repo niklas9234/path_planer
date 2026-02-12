@@ -227,15 +227,15 @@ werden automatisch gesetzt.
 
 ```bash
 python3 docs/ticket-sys/scripts/create_ticket.py \
-  --id CORE-001 \
+  --area be \
   --title "World model basics"
 
 ```
 ### Parameter
 
 ```bash
---id
-# ID - Eindeutige Ticket-ID im Format <PREFIX>-<NNN> (z.B. CORE-001, FE-002).
+--area
+# AREA - SIEHE "Prefixe und Bedeutung"
 
 --title
 # Titel - Lesbarer Titel des Tickets. Der Titel wird zusätzlich zur Generierung des Dateinamens (Slug) verwendet.

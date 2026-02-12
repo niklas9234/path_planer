@@ -1,8 +1,8 @@
 # Ticket Board
 
-Generated: 2026-01-19
+Generated: 2026-02-12
 
-Progress: 0 / 1 done
+Progress: 0 / 2 done
 
 Legend: status = backlog | in_progress | done; prio = P0 (highest) .. P2
 
@@ -10,13 +10,13 @@ Legend: status = backlog | in_progress | done; prio = P0 (highest) .. P2
 
 | ID | Title | Area | Prio | Created | File |
 |---|---|---|---|---|---|
-| SO-001 | Neues Ticket mit auto Zahl Test | so | P1 | 2026-01-19 | [tickets/SO-001-neues-ticket-mit-auto-zahl-test.md](tickets/SO-001-neues-ticket-mit-auto-zahl-test.md) |
+| CORE-001 | dev entrypoint | core | P1 | 2026-02-12 | [tickets/CORE-001-dev-entrypoint.md](tickets/CORE-001-dev-entrypoint.md) |
 
 ## In Progress
 
 | ID | Title | Area | Prio | Created | File |
 |---|---|---|---|---|---|
-| _none_ |  |  |  |  |  |
+| DOC-001 | README vereinheitlichen | doc | P1 | 2026-02-12 | [tickets/DOC-001-readme-vereinheitlichen.md](tickets/DOC-001-readme-vereinheitlichen.md) |
 
 ## Done
 

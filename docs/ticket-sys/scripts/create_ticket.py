@@ -94,6 +94,8 @@ def build_frontmatter(ticket_id: str, title: str, area: str, prio: str, created:
         f"area: {area}\n"
         f"prio: {prio}\n"
         f"created: {created}\n"
+        "change -status between - backlog | in_progress | done - \n"
+        "change -prio between - P0 | P1 | P2 -\n"
         "---\n"
     )
 
