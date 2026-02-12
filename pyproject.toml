@@ -1,0 +1,19 @@
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 88
+select = [
+    "E",  # pycodestyle errors (PEP 8)
+    "F",  # pyflakes
+    "W",  # warnings
+    "D",  # pydocstyle (PEP 257)
+]
+ignore = [
+    "D203",  # conflicts with D211
+    "D212",  # conflicts with D213
+]
+
+[tool.ruff.pydocstyle]
+convention = "pep257"
