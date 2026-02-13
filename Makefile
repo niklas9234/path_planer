@@ -37,14 +37,14 @@ help:
 	@echo "    make install           Install Python dev dependencies (black, ruff, pytest, mypy, pre-commit)"
 	@echo ""
 	@echo "  Run:"
-	@echo "    make backend-run       Run backend server (expects backend entrypoint)"
+	@echo "    make backend-run       Run backend server (main.py in backend/)"
 	@echo "    make frontend-run      Run frontend dev server"
-	@echo "    make dev               Print instructions to run both (or run in parallel if you want)"
+	@echo "    make dev               Ruun both backend and frontend"
 	@echo ""
 	@echo "  Quality:"
 	@echo "    make format            Format Python (black) and auto-fix lint (ruff)"
 	@echo "    make lint              Lint Python (ruff) without fixing"
-	@echo "    make typecheck         Run mypy (if configured)"
+	@echo "    make typecheck         Run mypy "
 	@echo "    make test              Run Python tests (pytest)"
 	@echo ""
 	@echo "  Frontend (optional, if set up):"
@@ -83,8 +83,6 @@ dev:
 	@echo "Run in two terminals:"
 	@echo "  Terminal 1: make backend-run"
 	@echo "  Terminal 2: make frontend-run"
-	@echo ""
-	@echo "Optional: you can implement a parallel runner later (e.g., 'concurrently' or docker-compose)."
 
 # --- Quality targets (Python) ---
 
@@ -107,7 +105,7 @@ typecheck:
 test:
 	@$(PY) -m pytest -q
 
-# --- Frontend convenience targets (only work once frontend is set up) ---
+# --- Frontend convenience targets ---
 
 .PHONY: frontend-install
 frontend-install:

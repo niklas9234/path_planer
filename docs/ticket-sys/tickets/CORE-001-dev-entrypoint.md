@@ -23,3 +23,13 @@ make dev             // startet Backend + Frontend (parallel)
 make test            // führt Backend-Tests + Frontend-Tests aus
 make format          // cleanup (z.B. mit black/ruff + prettier/eslint)
 ```
+
+
+## Result
+
+- [Makefile](../../../Makefile) wurde erstellt.
+- make backend-rund funktioniert 
+- künftige Überarbeitungen werden nicht zwingend mit neuen Tickets dokumentiert aber eventuell in diesem Ticket. 
+
+
+## Updates
