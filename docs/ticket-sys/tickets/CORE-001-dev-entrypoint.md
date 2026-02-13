@@ -1,7 +1,7 @@
 ---
 id: CORE-001
 title: "dev entrypoint"
-status: backlog
+status: done
 area: core
 prio: P1
 created: 2026-02-12
