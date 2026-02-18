@@ -4,16 +4,35 @@ target-version = ["py311"]
 
 [tool.ruff]
 line-length = 88
-select = [
-    "E",  # pycodestyle errors (PEP 8)
-    "F",  # pyflakes
-    "W",  # warnings
-    "D",  # pydocstyle (PEP 257)
-]
-ignore = [
-    "D203",  # conflicts with D211
-    "D212",  # conflicts with D213
+target-version = "py311"
+
+# Keep tool runs clean in a monorepo
+extend-exclude = [
+    ".venv",
+    "node_modules",
+    "experiments/runs",
+    "dist",
+    "build",
+    "__pycache__",
 ]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint]
+# E/W: PEP8 style, F: pyflakes, D: pydocstyle (PEP 257)
+# I: import sorting, B: bugbear (common pitfalls), UP: pyupgrade (modern syntax)
+select = ["E", "W", "F", "D", "I", "B", "UP"]
+
+# Resolve pydocstyle rule-set conflicts (common, recommended)
+ignore = [
+    "D203", # 1 blank line required before class docstring (conflicts with D211)
+    "D212", # multi-line docstring summary should start at the first line (conflicts with D213)
+]
+
+[tool.ruff.lint.pydocstyle]
 convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+# Tests should not be forced to have module/class/function docstrings
+"**/tests/**" = ["D100", "D101", "D102", "D103"]
+
+# __init__.py docstrings are often noisy in early development; keep optional
+"**/__init__.py" = ["D104"]

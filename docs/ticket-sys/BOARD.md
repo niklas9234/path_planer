@@ -2,7 +2,7 @@
 
 Generated: 2026-02-13
 
-Progress: 0 / 3 done
+Progress: 1 / 3 done
 
 Legend: status = backlog | in_progress | done; prio = P0 (highest) .. P2
 
@@ -10,7 +10,6 @@ Legend: status = backlog | in_progress | done; prio = P0 (highest) .. P2
 
 | ID | Title | Area | Prio | Created | File |
 |---|---|---|---|---|---|
-| CORE-001 | dev entrypoint | core | P1 | 2026-02-12 | [tickets/CORE-001-dev-entrypoint.md](tickets/CORE-001-dev-entrypoint.md) |
 | CORE-002 | shared-protocol | core | P1 | 2026-02-12 | [tickets/CORE-002-shared-protocol.md](tickets/CORE-002-shared-protocol.md) |
 
 ## In Progress
@@ -23,4 +22,4 @@ Legend: status = backlog | in_progress | done; prio = P0 (highest) .. P2
 
 | ID | Title | Area | Prio | Created | File |
 |---|---|---|---|---|---|
-| _none_ |  |  |  |  |  |
+| CORE-001 | dev entrypoint | core | P1 | 2026-02-12 | [tickets/CORE-001-dev-entrypoint.md](tickets/CORE-001-dev-entrypoint.md) |
