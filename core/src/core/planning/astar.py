@@ -5,7 +5,7 @@ import heapq
 from math import inf, sqrt
 
 from core.domain.Position import Position
-from core.domain.world import WorldSnapshot
+from core.domain.world import World
 
 
 @dataclass(frozen=True)
@@ -32,7 +32,7 @@ def _reconstruct_path(
     return path
 
 
-def plan(world: WorldSnapshot, start: Position, goal: Position) -> PlanResult:
+def plan(world: World, start: Position, goal: Position) -> PlanResult:
     """Compute a shortest path from start to goal using A* on the given world."""
     if world.is_blocked(start):
         raise ValueError(f"Start position is blocked: {start}")

@@ -6,7 +6,7 @@ from math import sqrt
 from core.domain.Position import Position
 
 
-class WorldSnapshot:
+class World:
     def __init__(
         self,
         width: int,
