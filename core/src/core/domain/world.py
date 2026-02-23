@@ -1,8 +1,15 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from math import sqrt
 
+from core.config.defaults import (
+    CARDINAL_STEP_FACTOR,
+    DEFAULT_BASE_COST,
+    DEFAULT_CELL_SIZE_M,
+    DEFAULT_CONNECTIVITY,
+    DEFAULT_EXTRA_COST,
+    DIAGONAL_STEP_FACTOR,
+)
 from core.domain.Position import Position
 
 
@@ -12,8 +19,8 @@ class World:
         width: int,
         height: int,
         *,
-        cell_size_m: float = 1.0,
-        base_cost: float = 1.0,
+        cell_size_m: float = DEFAULT_CELL_SIZE_M,
+        base_cost: float = DEFAULT_BASE_COST,
     ) -> None:
         if width <= 0 or height <= 0:
             raise ValueError(f"World dimensions must be > 0, got {width=} {height=}.")
@@ -25,17 +32,17 @@ class World:
         self.width = width
         self.height = height
         self.cell_size_m = float(cell_size_m)
-        self.connectivity = 8
+        self.connectivity = DEFAULT_CONNECTIVITY
         self.base_cost = float(base_cost)
 
         self.blocked: list[list[bool]] = [
             [False for _ in range(self.width)] for _ in range(self.height)
         ]
         self.extra_cost: list[list[float]] = [
-            [0.0 for _ in range(self.width)] for _ in range(self.height)
+            [DEFAULT_EXTRA_COST for _ in range(self.width)] for _ in range(self.height)
         ]
 
-        self._diag_factor = sqrt(2.0)
+        self._diag_factor = DIAGONAL_STEP_FACTOR
 
     def in_bounds(self, x: int, y: int) -> bool:
         return 0 <= x < self.width and 0 <= y < self.height
@@ -66,10 +73,10 @@ class World:
         self.assert_in_bounds(pos.x, pos.y)
 
         deltas: list[tuple[int, int, float]] = [
-            (1, 0, 1.0),
-            (-1, 0, 1.0),
-            (0, 1, 1.0),
-            (0, -1, 1.0),
+            (1, 0, CARDINAL_STEP_FACTOR),
+            (-1, 0, CARDINAL_STEP_FACTOR),
+            (0, 1, CARDINAL_STEP_FACTOR),
+            (0, -1, CARDINAL_STEP_FACTOR),
             (1, 1, self._diag_factor),
             (1, -1, self._diag_factor),
             (-1, 1, self._diag_factor),
@@ -110,7 +117,7 @@ class World:
         self.extra_cost[pos.y][pos.x] += float(delta)
 
     def clear_extra_cost(self, pos: Position) -> None:
-        self.set_extra_cost(pos, 0.0)
+        self.set_extra_cost(pos, DEFAULT_EXTRA_COST)
 
     def apply_cost_zone(self, cells: Iterable[Position], delta: float) -> None:
         self._assert_nonnegative(delta, "delta")
