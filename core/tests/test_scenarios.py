@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from core.experiments.scenarios import required_scenarios, run_scenario
+from core.experiments import required_scenarios, run_scenario
 
 
 def _scenario_by_name(name: str):

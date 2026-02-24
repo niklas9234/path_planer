@@ -4,8 +4,7 @@ import heapq
 from dataclasses import dataclass
 from math import inf, sqrt
 
-from core.domain.position import Position
-from core.domain.world import World
+from core.domain import Position, World
 
 
 @dataclass(frozen=True)
@@ -33,7 +32,12 @@ def _reconstruct_path(
 
 
 def plan(world: World, start: Position, goal: Position) -> PlanResult:
-    """Compute a shortest path from start to goal using A* on the given world."""
+    """Compute a shortest path with A* as a pure input/output function.
+
+    The function does not mutate ``world``, ``start`` or ``goal``. It either
+    returns a path-inclusive ``PlanResult`` or raises ``NoPath`` when no route
+    exists between the provided endpoints.
+    """
     if world.is_blocked(start):
         raise ValueError(f"Start position is blocked: {start}")
     if world.is_blocked(goal):
@@ -53,7 +57,10 @@ def plan(world: World, start: Position, goal: Position) -> PlanResult:
         if current in closed:
             continue
         if current == goal:
-            return PlanResult(path=_reconstruct_path(came_from, current), total_cost=g_score[current])
+            return PlanResult(
+                path=_reconstruct_path(came_from, current),
+                total_cost=g_score[current],
+            )
 
         closed.add(current)
 
@@ -69,4 +76,4 @@ def plan(world: World, start: Position, goal: Position) -> PlanResult:
                 f_score = tentative + _octile(neighbor_pos, goal)
                 heapq.heappush(open_heap, (f_score, push_count, neighbor_pos))
 
-    return PlanResult(path=[], total_cost=inf)
+    raise NoPath(f"No path from {start} to {goal}.")
