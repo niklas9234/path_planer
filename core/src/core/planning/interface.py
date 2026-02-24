@@ -1,0 +1,11 @@
+from __future__ import annotations
+
+from collections.abc import Protocol
+
+from core.domain.Position import Position
+from core.domain.world import World
+from core.planning.astar import PlanResult
+
+
+class Planner(Protocol):
+    def __call__(self, world: World, start: Position, goal: Position) -> PlanResult: ...
