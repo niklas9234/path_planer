@@ -4,7 +4,7 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
-from core.domain.Position import Position
+from core.domain.position import Position
 from core.domain.events import (
     AddObstacle,
     ClearExtraCost,

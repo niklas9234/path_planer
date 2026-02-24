@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from core.domain.Position import Position
+from core.domain.position import Position
 from core.domain.RobotState import RobotState
 from core.domain.events import (
     AddObstacle,

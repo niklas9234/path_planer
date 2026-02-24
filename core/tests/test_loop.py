@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import pytest
-
-from core.domain.Position import Position
 from core.domain.events import AddObstacle, SetGoal
+from core.domain.position import Position
 from core.planning.astar import plan
 from core.simulation.engine import SimulationEngine
 from core.simulation.loop import run_tick, run_until_done

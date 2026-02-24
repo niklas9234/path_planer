@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TypeAlias
 
-from core.domain.Position import Position
+from core.domain.position import Position
 
 
 @dataclass(frozen=True, slots=True)

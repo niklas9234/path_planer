@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from core.domain.Position import Position
+from core.domain.position import Position
 from core.domain.events import AddObstacle, ClearGoal, SetGoal, SetRobotPosition
 from core.planning.astar import plan
 from core.simulation.engine import SimulationEngine
