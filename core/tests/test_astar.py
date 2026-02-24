@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from math import inf, isclose
+from math import isclose
 
-from core.domain.position import Position
-from core.domain.world import World
-from core.planning.astar import plan
+from core.domain import Position, World
+from core.planning import plan
 
 
 def test_plan_returns_direct_diagonal_path_in_empty_world() -> None:
@@ -33,14 +32,12 @@ def test_plan_avoids_blocked_cell_and_finds_alternative_route() -> None:
     assert isclose(result.total_cost, 1 + (2**0.5) + 1, rel_tol=1e-9)
 
 
-def test_plan_returns_empty_path_if_goal_is_not_reachable() -> None:
+def test_plan_raises_nopath_if_goal_is_not_reachable() -> None:
     world = World(width=3, height=3)
     goal = Position(2, 2)
     world.add_obstacle(Position(1, 1))
     world.add_obstacle(Position(1, 2))
     world.add_obstacle(Position(2, 1))
 
-    result = plan(world, Position(0, 0), goal)
-
-    assert result.path == []
-    assert result.total_cost == inf
+    with pytest.raises(NoPath):
+        plan(world, Position(0, 0), goal)

@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from core.planning.interface import Planner
+from core.planning import Planner
 from core.simulation.engine import SimulationEngine
 
 RunReason = Literal["running", "goal_reached", "stalled", "max_ticks"]
@@ -29,7 +29,17 @@ class RunResult:
 
 
 def run_tick(engine: SimulationEngine, planner: Planner) -> TickResult:
-    replanned = engine.replan_if_needed(planner)
+    try:
+        replanned = engine.replan(planner)
+    except NoPath:
+        return TickResult(
+            replanned=True,
+            moved=False,
+            at_goal=False,
+            done=True,
+            reason="stalled",
+        )
+
     moved = engine.step()
     at_goal = engine.state.robot.at_goal()
 
