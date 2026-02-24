@@ -28,7 +28,17 @@ class RunResult:
 
 
 def run_tick(engine: SimulationEngine, planner: Planner) -> TickResult:
-    replanned = engine.replan_if_needed(planner)
+    try:
+        replanned = engine.replan(planner)
+    except NoPath:
+        return TickResult(
+            replanned=True,
+            moved=False,
+            at_goal=False,
+            done=True,
+            reason="stalled",
+        )
+
     moved = engine.step()
     at_goal = engine.state.robot.at_goal()
 

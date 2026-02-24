@@ -32,7 +32,12 @@ def _reconstruct_path(
 
 
 def plan(world: World, start: Position, goal: Position) -> PlanResult:
-    """Compute a shortest path from start to goal using A* on the given world."""
+    """Compute a shortest path with A* as a pure input/output function.
+
+    The function does not mutate ``world``, ``start`` or ``goal``. It either
+    returns a path-inclusive ``PlanResult`` or raises ``NoPath`` when no route
+    exists between the provided endpoints.
+    """
     if world.is_blocked(start):
         raise ValueError(f"Start position is blocked: {start}")
     if world.is_blocked(goal):
@@ -71,4 +76,4 @@ def plan(world: World, start: Position, goal: Position) -> PlanResult:
                 f_score = tentative + _octile(neighbor_pos, goal)
                 heapq.heappush(open_heap, (f_score, push_count, neighbor_pos))
 
-    return PlanResult(path=[], total_cost=inf)
+    raise NoPath(f"No path from {start} to {goal}.")
