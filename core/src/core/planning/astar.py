@@ -4,8 +4,7 @@ import heapq
 from dataclasses import dataclass
 from math import inf, sqrt
 
-from core.domain.position import Position
-from core.domain.world import World
+from core.domain import Position, World
 
 
 @dataclass(frozen=True)
@@ -53,7 +52,10 @@ def plan(world: World, start: Position, goal: Position) -> PlanResult:
         if current in closed:
             continue
         if current == goal:
-            return PlanResult(path=_reconstruct_path(came_from, current), total_cost=g_score[current])
+            return PlanResult(
+                path=_reconstruct_path(came_from, current),
+                total_cost=g_score[current],
+            )
 
         closed.add(current)
 

@@ -3,14 +3,13 @@ from __future__ import annotations
 from dataclasses import FrozenInstanceError
 
 import pytest
-
-from core.domain.position import Position
-from core.domain.events import (
+from core.domain import (
     AddObstacle,
     ClearExtraCost,
     ClearGoal,
     DomainEvent,
     InitWorld,
+    Position,
     RemoveObstacle,
     ResetSimulation,
     SetExtraCost,

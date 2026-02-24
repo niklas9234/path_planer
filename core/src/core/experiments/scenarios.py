@@ -2,13 +2,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from core.domain.events import AddObstacle, SetGoal
-from core.domain.position import Position
-from core.planning.astar import plan
-from core.planning.interface import Planner
-from core.simulation.engine import SimulationEngine
-from core.simulation.loop import RunReason, RunResult, run_tick
-from core.simulation.state import SimulationState
+from core.domain import AddObstacle, Position, SetGoal
+from core.planning import Planner, plan
+from core.simulation import (
+    RunReason,
+    RunResult,
+    SimulationEngine,
+    SimulationState,
+    run_tick,
+)
 
 
 @dataclass(frozen=True, slots=True)
