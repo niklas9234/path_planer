@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Protocol
+from collections.abc import Protocol
 
 from core.domain.Position import Position
 from core.domain.world import World
