@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from math import isclose
 
+import pytest
+
 from core.domain import Position, World
-from core.planning import plan
+from core.planning import NoPath, plan
 
 
 def test_plan_returns_direct_diagonal_path_in_empty_world() -> None:
