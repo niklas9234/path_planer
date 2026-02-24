@@ -9,6 +9,7 @@ from core.domain import Position, RobotState, World
 class SimulationState:
     world: World
     robot: RobotState
+    metrics: MetricsRecorder
     dirty_replan: bool = False
     tick: int = 0
 
@@ -30,4 +31,4 @@ class SimulationState:
         )
         world.assert_in_bounds(robot_position.x, robot_position.y)
         robot = RobotState(position=robot_position)
-        return cls(world=world, robot=robot)
+        return cls(world=world, robot=robot, metrics=MetricsRecorder())
