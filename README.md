@@ -120,6 +120,12 @@ docs/ticket-sys/   Lightweight ticket system used during development
 
 ---
 
+## Core Import Conventions
+
+- `Position` exists exactly once at `core.domain.position.Position` and is re-exported via `core.domain.Position`.
+- Feature modules (planning, simulation, experiments, and upcoming CLI/metrics runners) should import domain/public APIs from package roots, e.g. `from core.domain import Position` and `from core.simulation import SimulationEngine`.
+- Avoid deep imports in new components unless extending the same package internals; this keeps public paths stable and prevents accidental circular dependencies.
+
 ## Notes
 
 This README intentionally focuses on **architecture and system behavior**.

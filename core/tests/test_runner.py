@@ -1,78 +1,36 @@
 from __future__ import annotations
 
-import json
-
-from core.experiments.runner import ARTIFACT_SCHEMA_VERSION, run_experiments
+from core.experiments.runner import run_experiment
 from core.experiments.scenarios import required_scenarios
 
 
-def test_run_experiments_persists_schema_fields(tmp_path) -> None:
-    run_id = "schema-check"
-
-    payload = run_experiments(
-        run_id=run_id,
-        persist_artifact=True,
-        output_dir=tmp_path,
-        include_snapshots=True,
-    )
-
-    artifact_path = tmp_path / f"run_{run_id}.json"
-    assert artifact_path.exists()
-
-    on_disk = json.loads(artifact_path.read_text(encoding="utf-8"))
-    assert on_disk == payload
-
-    assert payload["schema_version"] == ARTIFACT_SCHEMA_VERSION
-    assert set(payload.keys()) == {
-        "schema_version",
-        "run_context",
-        "summary_metrics",
-        "snapshots",
-    }
-
-    run_context = payload["run_context"]
-    assert run_context["run_id"] == run_id
-    assert run_context["scenario_count"] == len(required_scenarios())
-    assert isinstance(run_context["scenario_names"], list)
-
-    summary = payload["summary_metrics"]
-    assert {
-        "total_scenarios",
-        "completed_scenarios",
-        "failed_scenarios",
-        "total_ticks",
-        "total_replans",
-        "total_moves",
-        "reasons",
-    }.issubset(summary.keys())
-
-    snapshots = payload["snapshots"]
-    assert isinstance(snapshots, list)
-    assert snapshots
-    assert {
-        "scenario_name",
-        "done",
-        "reason",
-        "ticks_executed",
-        "replans",
-        "moves",
-    }.issubset(snapshots[0].keys())
+def _scenario_by_name(name: str):
+    scenarios = {scenario.name: scenario for scenario in required_scenarios()}
+    return scenarios[name]
 
 
-def test_summary_metrics_are_stable_for_identical_inputs() -> None:
-    scenarios = required_scenarios()
+def test_run_experiment_is_reproducible_for_fixed_seed() -> None:
+    scenario = _scenario_by_name("replan_after_obstacle")
 
-    first = run_experiments(
-        run_id="first",
-        scenarios=scenarios,
-        persist_artifact=False,
-        include_snapshots=True,
-    )
-    second = run_experiments(
-        run_id="second",
-        scenarios=scenarios,
-        persist_artifact=False,
-        include_snapshots=True,
-    )
+    first = run_experiment(scenario, seed=1337)
+    second = run_experiment(scenario, seed=1337)
 
-    assert first["summary_metrics"] == second["summary_metrics"]
+    assert first.run_context.run_id == second.run_context.run_id
+    assert first.run_result == second.run_result
+    assert first.metrics.ticks_executed == second.metrics.ticks_executed
+    assert first.metrics.replans == second.metrics.replans
+    assert first.metrics.moves == second.metrics.moves
+    assert first.metrics.reason == second.metrics.reason
+
+
+def test_run_context_available_in_metrics_and_exports() -> None:
+    scenario = _scenario_by_name("empty_world_reaches_goal")
+
+    result = run_experiment(scenario, seed=7)
+    payload = result.to_export_dict()
+
+    assert result.metrics.run_context is result.run_context
+    assert payload["run_context"]["run_id"] == result.run_context.run_id
+    assert payload["metrics"]["run_id"] == result.run_context.run_id
+    assert payload["snapshots"][0]["meta"]["run_id"] == result.run_context.run_id
+    assert payload["snapshots"][0]["meta"]["tick"] == result.run_result.ticks_executed
