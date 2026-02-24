@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from dataclasses import dataclass
 
-from core.domain.Position import Position
+from core.domain.position import Position
 
 
 @dataclass(slots=True)

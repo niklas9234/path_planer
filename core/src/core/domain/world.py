@@ -10,7 +10,7 @@ from core.config.defaults import (
     DEFAULT_EXTRA_COST,
     DIAGONAL_STEP_FACTOR,
 )
-from core.domain.Position import Position
+from core.domain.position import Position
 
 
 class World:

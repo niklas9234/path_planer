@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from math import inf, isclose
 
-from core.domain.Position import Position
+from core.domain.position import Position
 from core.domain.world import World
 from core.planning.astar import plan
 

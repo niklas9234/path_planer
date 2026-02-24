@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import heapq
+from dataclasses import dataclass
 from math import inf, sqrt
 
-from core.domain.Position import Position
+from core.domain.position import Position
 from core.domain.world import World
 
 
