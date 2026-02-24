@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import heapq
 from math import inf, sqrt
 
-from core.domain.Position import Position
+from core.domain.position import Position
 from core.domain.world import World
 
 
