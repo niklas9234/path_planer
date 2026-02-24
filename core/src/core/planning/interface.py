@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from core.domain.position import Position
-from core.domain.world import World
+from core.domain import Position, World
 from core.planning.astar import PlanResult
 
 

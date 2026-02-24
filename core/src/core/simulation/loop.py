@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from core.planning.interface import Planner
+from core.planning import Planner
 from core.simulation.engine import SimulationEngine
 
 RunReason = Literal["running", "goal_reached", "stalled", "max_ticks"]

@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from core.domain.position import Position
-from core.domain.events import AddObstacle, ClearGoal, SetGoal, SetRobotPosition
-from core.planning.astar import plan
-from core.simulation.engine import SimulationEngine
-from core.simulation.state import SimulationState
+from core.domain import AddObstacle, ClearGoal, Position, SetGoal, SetRobotPosition
+from core.planning import plan
+from core.simulation import SimulationEngine, SimulationState
 
 
 def _make_engine() -> SimulationEngine:
