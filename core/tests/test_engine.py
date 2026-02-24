@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import pytest
+
 from core.domain import AddObstacle, ClearGoal, Position, SetGoal, SetRobotPosition
 from core.planning import plan
+from core.planning.astar import NoPath
 from core.simulation import SimulationEngine, SimulationState
 
 

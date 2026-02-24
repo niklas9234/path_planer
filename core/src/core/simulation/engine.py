@@ -17,8 +17,9 @@ from core.domain import (
     SetRobotPosition,
     World,
 )
+from core.metrics.recorder import MetricsRecorder
 from core.planning.astar import PlanResult
-from core.planning.interface import NoPath
+from core.planning.astar import NoPath
 from core.simulation.state import SimulationState
 
 PlannerFn = Callable[[World, Position, Position], PlanResult]
@@ -47,6 +48,7 @@ class SimulationEngine:
 
     def apply(self, event: DomainEvent) -> None:
         """Apply one domain event; never plan or move within this method."""
+        self.state.metrics.record_apply_event(tick=self.state.tick, event=event)
         if isinstance(event, InitWorld):
             self._apply_init_world(event)
             return
@@ -117,8 +119,26 @@ class SimulationEngine:
             )
             return False
 
-        result = planner(self.state.world, self.state.robot.position, goal)
+        try:
+            result = planner(self.state.world, self.state.robot.position, goal)
+        except NoPath:
+            self.state.metrics.record_replan_result(
+                tick=self.state.tick,
+                replanned=True,
+                found_path=False,
+                world=self.state.world,
+                robot=self.state.robot,
+            )
+            raise
+
         if not result.path:
+            self.state.metrics.record_replan_result(
+                tick=self.state.tick,
+                replanned=True,
+                found_path=False,
+                world=self.state.world,
+                robot=self.state.robot,
+            )
             raise NoPath(f"No path from {self.state.robot.position} to {goal}.")
 
         start_index = 1 if result.path[0] == self.state.robot.position else 0

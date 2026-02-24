@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from core.planning import Planner
+from core.planning.astar import NoPath
 from core.simulation.engine import SimulationEngine
 
 RunReason = Literal["running", "goal_reached", "stalled", "max_ticks"]
