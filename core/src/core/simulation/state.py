@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from core.domain import Position, RobotState, World
+from core.metrics.recorder import MetricsRecorder
 
 
 @dataclass(slots=True)

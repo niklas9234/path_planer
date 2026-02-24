@@ -1,4 +1,4 @@
-from core.planning.astar import PlanResult, plan
+from core.planning.astar import NoPath, PlanResult, plan
 from core.planning.interface import Planner
 
-__all__ = ["PlanResult", "Planner", "plan"]
+__all__ = ["NoPath", "PlanResult", "Planner", "plan"]

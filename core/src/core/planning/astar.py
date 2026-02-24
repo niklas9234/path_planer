@@ -7,6 +7,10 @@ from math import inf, sqrt
 from core.domain import Position, World
 
 
+class NoPath(RuntimeError):
+    """Raised when no path exists between start and goal."""
+
+
 @dataclass(frozen=True)
 class PlanResult:
     path: list[Position]
