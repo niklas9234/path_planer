@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import pytest
-from core.domain.events import AddObstacle, SetGoal
-from core.domain.position import Position
-from core.planning.astar import plan
-from core.simulation.engine import SimulationEngine
-from core.simulation.loop import run_tick, run_until_done
-from core.simulation.state import SimulationState
+from core.domain import AddObstacle, Position, SetGoal
+from core.planning import plan
+from core.simulation import SimulationEngine, SimulationState, run_tick, run_until_done
 
 
-def _make_engine(width: int = 5, height: int = 5, start: Position = Position(0, 0)) -> SimulationEngine:
+def _make_engine(
+    width: int = 5,
+    height: int = 5,
+    start: Position | None = None,
+) -> SimulationEngine:
+    if start is None:
+        start = Position(0, 0)
     return SimulationEngine(
         SimulationState.create(width=width, height=height, robot_position=start),
     )
