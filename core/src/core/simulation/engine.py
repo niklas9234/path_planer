@@ -17,6 +17,7 @@ from core.domain.events import (
     SetRobotPosition,
 )
 from core.domain.world import World
+from core.metrics.recorder import MetricsRecorder
 from core.planning.astar import PlanResult
 from core.simulation.state import SimulationState
 
@@ -26,8 +27,11 @@ PlannerFn = Callable[[World, Position, Position], PlanResult]
 class SimulationEngine:
     def __init__(self, state: SimulationState) -> None:
         self.state = state
+        if not hasattr(self.state, "metrics") or self.state.metrics is None:
+            self.state.metrics = MetricsRecorder()
 
     def apply(self, event: DomainEvent) -> None:
+        self.state.metrics.record_apply_event(tick=self.state.tick, event=event)
         if isinstance(event, InitWorld):
             self._apply_init_world(event)
             return
@@ -75,12 +79,26 @@ class SimulationEngine:
 
     def replan_if_needed(self, planner: PlannerFn) -> bool:
         if not self.state.dirty_replan:
+            self.state.metrics.record_replan_result(
+                tick=self.state.tick,
+                replanned=False,
+                found_path=bool(self.state.robot.path),
+                world=self.state.world,
+                robot=self.state.robot,
+            )
             return False
 
         goal = self.state.robot.goal
         if goal is None:
             self.state.robot.clear_plan()
             self.state.dirty_replan = False
+            self.state.metrics.record_replan_result(
+                tick=self.state.tick,
+                replanned=False,
+                found_path=False,
+                world=self.state.world,
+                robot=self.state.robot,
+            )
             return False
 
         result = planner(self.state.world, self.state.robot.position, goal)
@@ -92,6 +110,13 @@ class SimulationEngine:
             self.state.robot.set_path([])
 
         self.state.dirty_replan = False
+        self.state.metrics.record_replan_result(
+            tick=self.state.tick,
+            replanned=True,
+            found_path=bool(result.path),
+            world=self.state.world,
+            robot=self.state.robot,
+        )
         return True
 
     def step(self) -> bool:
@@ -99,10 +124,22 @@ class SimulationEngine:
 
         waypoint = self.state.robot.next_waypoint()
         if waypoint is None:
+            self.state.metrics.record_step(
+                tick=self.state.tick,
+                moved=False,
+                world=self.state.world,
+                robot=self.state.robot,
+            )
             return False
 
         self.state.robot.position = waypoint
         self.state.robot.advance_waypoint()
+        self.state.metrics.record_step(
+            tick=self.state.tick,
+            moved=True,
+            world=self.state.world,
+            robot=self.state.robot,
+        )
         return True
 
     def _apply_init_world(self, event: InitWorld) -> None:
@@ -115,3 +152,4 @@ class SimulationEngine:
         self.state.robot = RobotState(position=Position(0, 0))
         self.state.dirty_replan = False
         self.state.tick = 0
+        self.state.metrics = MetricsRecorder()

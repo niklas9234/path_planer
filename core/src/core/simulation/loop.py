@@ -25,6 +25,7 @@ class RunResult:
     moves: int
     done: bool
     reason: RunReason
+    run_metrics: dict[str, int | float | bool | str | None] | None = None
 
 
 def run_tick(engine: SimulationEngine, planner: Planner) -> TickResult:
@@ -85,6 +86,7 @@ def run_until_done(
                 moves=moves,
                 done=True,
                 reason=tick.reason,
+                run_metrics=engine.state.metrics.finalize_run_metrics(),
             )
 
     return RunResult(
@@ -93,4 +95,5 @@ def run_until_done(
         moves=moves,
         done=False,
         reason="max_ticks",
+        run_metrics=engine.state.metrics.finalize_run_metrics(),
     )

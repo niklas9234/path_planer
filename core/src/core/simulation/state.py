@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from core.metrics.recorder import MetricsRecorder
 from core.domain.position import Position
 from core.domain.robot_state import RobotState
 from core.domain.world import World
@@ -11,6 +12,7 @@ from core.domain.world import World
 class SimulationState:
     world: World
     robot: RobotState
+    metrics: MetricsRecorder
     dirty_replan: bool = False
     tick: int = 0
 
@@ -27,4 +29,4 @@ class SimulationState:
         world = World(width=width, height=height, cell_size_m=cell_size_m, base_cost=base_cost)
         world.assert_in_bounds(robot_position.x, robot_position.y)
         robot = RobotState(position=robot_position)
-        return cls(world=world, robot=robot)
+        return cls(world=world, robot=robot, metrics=MetricsRecorder())
