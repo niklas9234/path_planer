@@ -2,21 +2,21 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from core.domain.events import (
+from core.domain import (
     AddObstacle,
     ClearExtraCost,
     ClearGoal,
     DomainEvent,
     InitWorld,
+    Position,
     RemoveObstacle,
     ResetSimulation,
+    RobotState,
     SetExtraCost,
     SetGoal,
     SetRobotPosition,
+    World,
 )
-from core.domain.position import Position
-from core.domain.robot_state import RobotState
-from core.domain.world import World
 from core.planning.astar import PlanResult
 from core.planning.interface import NoPath
 from core.simulation.state import SimulationState

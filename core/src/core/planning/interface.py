@@ -2,15 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
-from core.domain.position import Position
-from core.domain.world import World
-
-if TYPE_CHECKING:
-    from core.planning.astar import PlanResult
-
-
-class NoPath(RuntimeError):
-    """Raised when a planner cannot produce any path from start to goal."""
+from core.domain import Position, World
+from core.planning.astar import PlanResult
 
 
 class Planner(Protocol):
