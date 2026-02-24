@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from core.domain.position import Position
-from core.domain.RobotState import RobotState
+from core.domain.robot_state import RobotState
 from core.domain.world import World
 
 
