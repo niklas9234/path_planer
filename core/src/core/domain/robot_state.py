@@ -33,6 +33,15 @@ class RobotState:
         self.goal = goal
         self.clear_plan()
 
+    def clear_goal(self) -> None:
+        self.goal = None
+        self.clear_plan()
+
+    def set_position(self, position: Position, *, clear_plan: bool = True) -> None:
+        self.position = position
+        if clear_plan:
+            self.clear_plan()
+
     def set_path(self, path: Iterable[Position], *, start_index: int = 0) -> None:
         self.path = list(path)
         if start_index < 0:
