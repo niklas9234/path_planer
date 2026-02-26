@@ -4,6 +4,7 @@ from collections.abc import Callable
 
 from core.domain import (
     AddObstacle,
+    AddZone,
     ClearExtraCost,
     ClearGoal,
     DomainEvent,
@@ -16,6 +17,7 @@ from core.domain import (
     SetGoal,
     SetRobotPosition,
     World,
+    ZoneType,
 )
 from core.metrics.recorder import MetricsRecorder
 from core.planning.astar import PlanResult
@@ -89,6 +91,26 @@ class SimulationEngine:
             self.state.world_delta.cost_cells_changed.add(event.position)
             self.state.dirty_replan = self.state.robot.goal is not None
             return
+        if isinstance(event, AddZone):
+            self.state.world.add_zone(
+                zone_type=event.zone_type,
+                cells=event.cells,
+                current_tick=self.state.tick,
+                duration_ticks=event.duration_ticks,
+                extra_cost=event.extra_cost,
+            )
+            if event.zone_type is ZoneType.OBSTACLE:
+                self.state.world_delta.obstacle_cells_changed.update(event.cells)
+            else:
+                self.state.world_delta.cost_cells_changed.update(event.cells)
+            self.state.metrics.record_zone_added(
+                tick=self.state.tick,
+                zone_type=event.zone_type,
+                cells=len(event.cells),
+                duration_ticks=event.duration_ticks,
+            )
+            self.state.dirty_replan = self.state.robot.goal is not None
+            return
         if isinstance(event, ResetSimulation):
             del event.seed
             self.state.tick = 0
@@ -96,6 +118,23 @@ class SimulationEngine:
             self.state.dirty_replan = self.state.robot.goal is not None
             return
         raise TypeError(f"Unsupported event type: {type(event)!r}")
+
+
+    def process_tick_updates(self) -> None:
+        """Apply implicit world updates for the current tick (e.g. zone TTL expiry)."""
+        changes = self.state.world.expire_zones(self.state.tick)
+        if changes.obstacle_cells_changed:
+            self.state.world_delta.obstacle_cells_changed.update(changes.obstacle_cells_changed)
+        if changes.cost_cells_changed:
+            self.state.world_delta.cost_cells_changed.update(changes.cost_cells_changed)
+
+        if changes.obstacle_cells_changed or changes.cost_cells_changed:
+            self.state.metrics.record_zone_expiration(
+                tick=self.state.tick,
+                obstacle_cells=len(changes.obstacle_cells_changed),
+                cost_cells=len(changes.cost_cells_changed),
+            )
+            self.state.dirty_replan = self.state.robot.goal is not None
 
     def replan(self, planner: PlannerFn) -> bool:
         """Recompute ``robot.path`` exactly once when ``dirty_replan`` is set."""

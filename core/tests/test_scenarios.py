@@ -41,3 +41,12 @@ def test_max_ticks_guard() -> None:
     result = run_scenario(scenario)
 
     assert result.reason == "max_ticks"
+
+
+def test_temporary_slow_zone_expires() -> None:
+    scenario = _scenario_by_name("temporary_slow_zone_expires")
+
+    result = run_scenario(scenario)
+
+    assert result.reason == "goal_reached"
+    assert result.replans >= 1

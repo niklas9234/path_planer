@@ -5,6 +5,7 @@ from statistics import mean
 
 from core.domain.events import (
     AddObstacle,
+    AddZone,
     ClearExtraCost,
     DomainEvent,
     RemoveObstacle,
@@ -28,6 +29,7 @@ class TickMetrics:
     ticks_to_goal: int | None = None
     no_path_events: int = 0
     obstacle_changes: int = 0
+    zone_expirations: int = 0
 
 
 @dataclass(slots=True)
@@ -44,6 +46,7 @@ class MetricsRecorder:
     replan_count_total: int = 0
     no_path_events_total: int = 0
     obstacle_changes_total: int = 0
+    zone_expirations_total: int = 0
     steps_taken_total: int = 0
     last_replan_trigger_reason: str | None = None
 
@@ -77,6 +80,9 @@ class MetricsRecorder:
             current.obstacle_changes = self.obstacle_changes_total
             self.last_replan_trigger_reason = "obstacle_changed"
             current.replan_trigger_reason = self.last_replan_trigger_reason
+        elif isinstance(event, AddZone):
+            self.last_replan_trigger_reason = f"zone_added:{event.zone_type.value}"
+            current.replan_trigger_reason = self.last_replan_trigger_reason
         elif isinstance(event, (SetExtraCost, ClearExtraCost)):
             self.last_replan_trigger_reason = "cost_changed"
             current.replan_trigger_reason = self.last_replan_trigger_reason
@@ -104,6 +110,19 @@ class MetricsRecorder:
             current.ticks_to_goal = tick
         self._update_path_metrics(current, world, robot)
 
+
+    def record_zone_added(self, *, tick: int, zone_type: object, cells: int, duration_ticks: int | None) -> None:
+        del zone_type, cells, duration_ticks
+        self._current_tick(tick)
+
+    def record_zone_expiration(self, *, tick: int, obstacle_cells: int, cost_cells: int) -> None:
+        current = self._current_tick(tick)
+        if obstacle_cells or cost_cells:
+            self.zone_expirations_total += 1
+            current.zone_expirations = self.zone_expirations_total
+            self.last_replan_trigger_reason = "zone_expired"
+            current.replan_trigger_reason = self.last_replan_trigger_reason
+
     def finalize_run_metrics(self) -> dict[str, int | float | bool | str | None]:
         goal_tick = next((item.ticks_to_goal for item in self.ticks if item.goal_reached), None)
         final_path_len = self.ticks[-1].path_length_current if self.ticks else 0
@@ -120,5 +139,6 @@ class MetricsRecorder:
             "ticks_to_goal": goal_tick,
             "no_path_events": self.no_path_events_total,
             "obstacle_changes": self.obstacle_changes_total,
+            "zone_expirations": self.zone_expirations_total,
             "mean_path_length_current": mean([item.path_length_current for item in self.ticks]) if self.ticks else 0.0,
         }

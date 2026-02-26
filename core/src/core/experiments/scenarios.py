@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from core.domain import Position
+from core.domain import Position, ZoneType
 from core.experiments.execution import execute_scenario
 from core.planning import Planner, plan
 from core.simulation import (
@@ -29,6 +29,7 @@ class ScenarioDefinition:
     initial_obstacles: tuple[Position, ...]
     max_ticks: int
     dynamic_obstacles_by_tick: dict[int, tuple[Position, ...]]
+    dynamic_zones_by_tick: dict[int, tuple[tuple[ZoneType, tuple[Position, ...], int | None, float], ...]]
     expectation: ScenarioExpectation
 
 
@@ -48,6 +49,7 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
             initial_obstacles=(),
             max_ticks=20,
             dynamic_obstacles_by_tick={},
+            dynamic_zones_by_tick={},
             expectation=ScenarioExpectation(
                 allowed_reasons=("goal_reached",),
                 min_moves=1,
@@ -66,6 +68,7 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
             ),
             max_ticks=10,
             dynamic_obstacles_by_tick={},
+            dynamic_zones_by_tick={},
             expectation=ScenarioExpectation(
                 allowed_reasons=("stalled",),
                 min_moves=0,
@@ -83,8 +86,26 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
             dynamic_obstacles_by_tick={
                 1: (Position(2, 0),),
             },
+            dynamic_zones_by_tick={},
             expectation=ScenarioExpectation(
                 allowed_reasons=("goal_reached", "stalled"),
+                min_replans=1,
+            ),
+        ),
+        ScenarioDefinition(
+            name="temporary_slow_zone_expires",
+            width=6,
+            height=3,
+            start=Position(0, 1),
+            goal=Position(5, 1),
+            initial_obstacles=(),
+            max_ticks=20,
+            dynamic_obstacles_by_tick={},
+            dynamic_zones_by_tick={
+                0: ((ZoneType.SLOW, (Position(1, 1), Position(2, 1)), 2, 3.0),),
+            },
+            expectation=ScenarioExpectation(
+                allowed_reasons=("goal_reached",),
                 min_replans=1,
             ),
         ),
@@ -97,6 +118,7 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
             initial_obstacles=(),
             max_ticks=1,
             dynamic_obstacles_by_tick={},
+            dynamic_zones_by_tick={},
             expectation=ScenarioExpectation(
                 allowed_reasons=("max_ticks",),
             ),
