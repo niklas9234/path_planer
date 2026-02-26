@@ -14,7 +14,6 @@ def _build_parser() -> argparse.ArgumentParser:
 
     run_parser = subparsers.add_parser("run-scenario", help="Run one scenario without frontend")
     run_parser.add_argument("--scenario", required=True)
-    run_parser.add_argument("--seed", type=int, required=True)
     run_parser.add_argument("--planner", default="astar")
     run_parser.add_argument("--max-ticks", type=int, default=None)
     run_parser.add_argument("--metrics-out", required=True)
@@ -42,7 +41,6 @@ def main(argv: list[str] | None = None) -> int:
 
     result = run_scenario_experiment(
         scenario_name=args.scenario,
-        seed=args.seed,
         planner=args.planner,
         max_ticks=args.max_ticks,
         include_tick_data=args.include_ticks,

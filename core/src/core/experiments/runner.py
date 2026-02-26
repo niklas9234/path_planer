@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import random
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
@@ -25,7 +24,6 @@ def _load_core_version() -> str:
 @dataclass(frozen=True, slots=True)
 class CliRunSummary:
     scenario: str
-    seed: int
     planner: str
     ticks_executed: int
     replans: int
@@ -77,12 +75,10 @@ def _tick_to_dict(item: TickMetrics) -> dict[str, int | float | bool | str | Non
 def run_scenario_experiment(
     *,
     scenario_name: str,
-    seed: int,
     planner: str = "astar",
     max_ticks: int | None = None,
     include_tick_data: bool = False,
 ) -> ScenarioExperimentResult:
-    random.seed(seed)
     if planner != "astar":
         raise ValueError(f"Unsupported planner: {planner}")
 
@@ -92,7 +88,6 @@ def run_scenario_experiment(
 
     summary = CliRunSummary(
         scenario=scenario.name,
-        seed=seed,
         planner=planner,
         ticks_executed=run_result.ticks_executed,
         replans=run_result.replans,
@@ -105,7 +100,7 @@ def run_scenario_experiment(
     tick_metrics = [_tick_to_dict(item) for item in engine.state.metrics.ticks if item.tick > 0]
 
     snapshot: dict[str, object] = {
-        "meta": {"tick": run_result.ticks_executed, "scenario": scenario.name, "seed": seed},
+        "meta": {"tick": run_result.ticks_executed, "scenario": scenario.name},
         "world": {"width": scenario.width, "height": scenario.height},
         "robot": {
             "position": {"x": engine.state.robot.position.x, "y": engine.state.robot.position.y},
@@ -125,18 +120,15 @@ def run_scenario_experiment(
 def run_experiment(
     scenario: ScenarioDefinition,
     *,
-    seed: int,
     planner_name: str = "astar",
     planner_params: Mapping[str, Any] | None = None,
     world_params: Mapping[str, Any] | None = None,
     recorder: object | None = None,
 ) -> ExperimentResult:
     del recorder
-    random.seed(seed)
 
     context = RunContext.create(
         scenario_name=scenario.name,
-        seed=seed,
         planner_name=planner_name,
         planner_params=planner_params,
         world_params=world_params,

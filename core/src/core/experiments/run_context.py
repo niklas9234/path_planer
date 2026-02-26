@@ -14,12 +14,11 @@ def _freeze_mapping(values: Mapping[str, Any] | None) -> Mapping[str, Any]:
     return MappingProxyType(frozen)
 
 
-def _stable_run_id(*, scenario_name: str, seed: int, planner_name: str, planner_params: Mapping[str, Any], world_params: Mapping[str, Any]) -> str:
+def _stable_run_id(*, scenario_name: str, planner_name: str, planner_params: Mapping[str, Any], world_params: Mapping[str, Any]) -> str:
     payload = {
         "planner_name": planner_name,
         "planner_params": dict(planner_params),
         "scenario_name": scenario_name,
-        "seed": seed,
         "world_params": dict(world_params),
     }
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
@@ -30,7 +29,6 @@ def _stable_run_id(*, scenario_name: str, seed: int, planner_name: str, planner_
 class RunContext:
     run_id: str
     scenario_name: str
-    seed: int
     planner_name: str
     planner_params: Mapping[str, Any]
     world_params: Mapping[str, Any]
@@ -42,7 +40,6 @@ class RunContext:
         cls,
         *,
         scenario_name: str,
-        seed: int,
         planner_name: str,
         planner_params: Mapping[str, Any] | None,
         world_params: Mapping[str, Any] | None,
@@ -54,13 +51,11 @@ class RunContext:
         return cls(
             run_id=_stable_run_id(
                 scenario_name=scenario_name,
-                seed=seed,
                 planner_name=planner_name,
                 planner_params=frozen_planner_params,
                 world_params=frozen_world_params,
             ),
             scenario_name=scenario_name,
-            seed=seed,
             planner_name=planner_name,
             planner_params=frozen_planner_params,
             world_params=frozen_world_params,
