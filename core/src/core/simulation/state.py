@@ -20,6 +20,7 @@ class SimulationState:
     metrics: MetricsRecorder
     world_delta: WorldDelta = field(default_factory=WorldDelta)
     dirty_replan: bool = False
+    replan_events: set[str] = field(default_factory=set)
     tick: int = 0
 
     @classmethod

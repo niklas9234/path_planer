@@ -3,7 +3,14 @@ from __future__ import annotations
 import pytest
 from core.domain import AddObstacle, Position, SetGoal
 from core.planning import plan
-from core.simulation import SimulationEngine, SimulationState, run_tick, run_until_done
+from core.simulation import (
+    PathAffectedReplanPolicy,
+    PeriodicReplanPolicy,
+    SimulationEngine,
+    SimulationState,
+    run_tick,
+    run_until_done,
+)
 
 
 def _make_engine(
@@ -29,6 +36,32 @@ def test_run_tick_replans_and_moves_towards_goal() -> None:
     assert result.done is False
     assert result.reason == "running"
     assert engine.state.robot.position == Position(1, 1)
+
+
+def test_periodic_policy_replans_every_two_ticks() -> None:
+    engine = _make_engine()
+    engine.apply(SetGoal(goal=Position(4, 4)))
+
+    t1 = run_tick(engine, plan, replan_policy=PeriodicReplanPolicy(interval_ticks=2))
+    t2 = run_tick(engine, plan, replan_policy=PeriodicReplanPolicy(interval_ticks=2))
+
+    assert t1.replanned is True
+    assert t2.replanned is False
+
+
+def test_path_affected_policy_replans_only_when_remaining_path_cut() -> None:
+    engine = _make_engine()
+    engine.apply(SetGoal(goal=Position(4, 4)))
+    run_tick(engine, plan, replan_policy=PathAffectedReplanPolicy())
+
+    engine.apply(AddObstacle(position=Position(4, 0)))
+    unaffected = run_tick(engine, plan, replan_policy=PathAffectedReplanPolicy())
+
+    engine.apply(AddObstacle(position=Position(3, 3)))
+    affected = run_tick(engine, plan, replan_policy=PathAffectedReplanPolicy())
+
+    assert unaffected.replanned is False
+    assert affected.replanned is True
 
 
 def test_run_until_done_reaches_goal() -> None:
