@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from core.domain import AddObstacle, SetGoal
+from core.domain import AddObstacle, AddZone, SetGoal
 
 if TYPE_CHECKING:
     from core.experiments.scenarios import ScenarioDefinition
@@ -41,6 +41,15 @@ def execute_scenario(
     for _ in range(max_ticks):
         for obstacle in scenario.dynamic_obstacles_by_tick.get(engine.state.tick, ()):
             engine.apply(AddObstacle(position=obstacle))
+        for zone_type, cells, duration_ticks, extra_cost in scenario.dynamic_zones_by_tick.get(engine.state.tick, ()):
+            engine.apply(
+                AddZone(
+                    zone_type=zone_type,
+                    cells=cells,
+                    duration_ticks=duration_ticks,
+                    extra_cost=extra_cost,
+                ),
+            )
 
         tick = run_tick(engine, planner)
         if tick.replanned:

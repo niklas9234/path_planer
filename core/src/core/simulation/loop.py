@@ -30,6 +30,7 @@ class RunResult:
 
 
 def run_tick(engine: SimulationEngine, planner: Planner) -> TickResult:
+    engine.process_tick_updates()
     try:
         replanned = engine.replan(planner)
     except NoPath:

@@ -4,12 +4,14 @@ import pytest
 
 from core.domain import (
     AddObstacle,
+    AddZone,
     ClearExtraCost,
     ClearGoal,
     Position,
     SetExtraCost,
     SetGoal,
     SetRobotPosition,
+    ZoneType,
 )
 from core.planning import plan
 from core.planning.astar import NoPath
@@ -139,4 +141,45 @@ def test_replan_propagates_nopath_and_keeps_dirty_flag() -> None:
     with pytest.raises(NoPath):
         engine.replan(plan)
 
+    assert engine.state.dirty_replan is True
+
+
+def test_add_slow_zone_triggers_replan_and_changes_cell_cost() -> None:
+    engine = _make_engine()
+    engine.apply(SetGoal(goal=Position(4, 4)))
+
+    engine.apply(
+        AddZone(
+            zone_type=ZoneType.SLOW,
+            cells=(Position(1, 1),),
+            duration_ticks=3,
+            extra_cost=5.0,
+        ),
+    )
+
+    assert engine.state.dirty_replan is True
+    assert engine.state.world.get_extra_cost(Position(1, 1)) == 5.0
+
+
+def test_expired_zone_marks_world_delta_and_requires_replan() -> None:
+    engine = _make_engine()
+    engine.apply(SetGoal(goal=Position(4, 4)))
+    engine.apply(
+        AddZone(
+            zone_type=ZoneType.OBSTACLE,
+            cells=(Position(1, 0),),
+            duration_ticks=1,
+        ),
+    )
+
+    assert engine.state.world.is_blocked(Position(1, 0)) is True
+
+    engine.process_tick_updates()
+    assert engine.state.world.is_blocked(Position(1, 0)) is True
+
+    engine.state.tick = 1
+    engine.process_tick_updates()
+
+    assert engine.state.world.is_blocked(Position(1, 0)) is False
+    assert Position(1, 0) in engine.state.world_delta.obstacle_cells_changed
     assert engine.state.dirty_replan is True

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from core.domain.events import AddObstacle, SetGoal
+from core.domain.events import AddObstacle, AddZone, SetGoal
 from core.domain.position import Position
+from core.domain.world import ZoneType
 from core.planning.astar import plan
 from core.simulation.engine import SimulationEngine
 from core.simulation.loop import run_tick, run_until_done
@@ -38,6 +39,7 @@ def test_metrics_start_goal_obstacle_replanning_finalize() -> None:
     assert metrics["ticks_to_goal"] == 3
     assert metrics["no_path_events"] == 0
     assert metrics["obstacle_changes"] == 1
+    assert metrics["zone_expirations"] == 0
 
 
 def test_metrics_no_path_event_is_counted() -> None:
@@ -53,3 +55,20 @@ def test_metrics_no_path_event_is_counted() -> None:
     assert result.run_metrics is not None
     assert result.run_metrics["replan_count"] == 1
     assert result.run_metrics["no_path_events"] == 1
+
+
+def test_metrics_counts_zone_expiration() -> None:
+    engine = _make_engine()
+    engine.apply(SetGoal(goal=Position(3, 1)))
+    engine.apply(
+        AddZone(
+            zone_type=ZoneType.SLOW,
+            cells=(Position(1, 1),),
+            duration_ticks=1,
+            extra_cost=2.0,
+        ),
+    )
+
+    run_until_done(engine, plan)
+
+    assert engine.state.metrics.zone_expirations_total >= 1

@@ -1,5 +1,6 @@
 from core.domain.events import (
     AddObstacle,
+    AddZone,
     ClearExtraCost,
     ClearGoal,
     DomainEvent,
@@ -12,10 +13,11 @@ from core.domain.events import (
 )
 from core.domain.position import Position
 from core.domain.robot_state import RobotState
-from core.domain.world import World
+from core.domain.world import World, ZoneType
 
 __all__ = [
     "AddObstacle",
+    "AddZone",
     "ClearExtraCost",
     "ClearGoal",
     "DomainEvent",
@@ -28,4 +30,5 @@ __all__ = [
     "SetGoal",
     "SetRobotPosition",
     "World",
+    "ZoneType",
 ]

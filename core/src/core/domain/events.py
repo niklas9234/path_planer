@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import TypeAlias
 
 from core.domain.position import Position
+from core.domain.world import ZoneType
 
 
 @dataclass(frozen=True, slots=True)
@@ -65,6 +66,16 @@ class ClearExtraCost:
 
 
 @dataclass(frozen=True, slots=True)
+class AddZone:
+    """Add a zone overlay with optional TTL in ticks."""
+
+    zone_type: ZoneType
+    cells: tuple[Position, ...]
+    duration_ticks: int | None = None
+    extra_cost: float = 0.0
+
+
+@dataclass(frozen=True, slots=True)
 class ResetSimulation:
     """Reset runtime simulation state; optional deterministic seed can be provided."""
 
@@ -80,6 +91,7 @@ DomainEvent: TypeAlias = (
     | RemoveObstacle
     | SetExtraCost
     | ClearExtraCost
+    | AddZone
     | ResetSimulation
 )
 
@@ -93,6 +105,7 @@ __all__ = [
     "RemoveObstacle",
     "SetExtraCost",
     "ClearExtraCost",
+    "AddZone",
     "ResetSimulation",
     "DomainEvent",
 ]
