@@ -1,9 +1,16 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from core.domain import Position, RobotState, World
 from core.metrics.recorder import MetricsRecorder
+
+
+@dataclass(slots=True)
+class WorldDelta:
+    obstacle_cells_changed: set[Position] = field(default_factory=set)
+    cost_cells_changed: set[Position] = field(default_factory=set)
+    world_reinitialized: bool = False
 
 
 @dataclass(slots=True)
@@ -11,6 +18,7 @@ class SimulationState:
     world: World
     robot: RobotState
     metrics: MetricsRecorder
+    world_delta: WorldDelta = field(default_factory=WorldDelta)
     dirty_replan: bool = False
     tick: int = 0
 

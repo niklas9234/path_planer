@@ -2,7 +2,15 @@ from __future__ import annotations
 
 import pytest
 
-from core.domain import AddObstacle, ClearGoal, Position, SetGoal, SetRobotPosition
+from core.domain import (
+    AddObstacle,
+    ClearExtraCost,
+    ClearGoal,
+    Position,
+    SetExtraCost,
+    SetGoal,
+    SetRobotPosition,
+)
 from core.planning import plan
 from core.planning.astar import NoPath
 from core.simulation import SimulationEngine, SimulationState
@@ -47,6 +55,21 @@ def test_obstacle_event_triggers_replan_for_existing_goal() -> None:
     engine.replan(plan)
 
     assert Position(1, 1) not in engine.state.robot.path
+    assert engine.state.world_delta.obstacle_cells_changed == set()
+
+
+def test_world_delta_tracks_and_clears_cost_changes_after_replan() -> None:
+    engine = _make_engine()
+    engine.apply(SetGoal(goal=Position(2, 2)))
+    engine.apply(SetExtraCost(position=Position(1, 0), value=2.0))
+    engine.apply(ClearExtraCost(position=Position(1, 0)))
+
+    assert engine.state.world_delta.cost_cells_changed == {Position(1, 0)}
+
+    engine.replan(plan)
+
+    assert engine.state.world_delta.cost_cells_changed == set()
+    assert engine.state.world_delta.world_reinitialized is False
 
 
 def test_set_robot_position_clears_plan_and_requires_replan_when_goal_exists() -> None:

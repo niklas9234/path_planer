@@ -17,6 +17,8 @@ def test_plan_returns_direct_diagonal_path_in_empty_world() -> None:
 
     assert result.path == [Position(0, 0), Position(1, 1), Position(2, 2)]
     assert isclose(result.total_cost, 2 * (2**0.5), rel_tol=1e-9)
+    assert result.expanded_nodes > 0
+    assert result.heap_pops >= result.expanded_nodes
 
 
 def test_plan_avoids_blocked_cell_and_finds_alternative_route() -> None:

@@ -2,14 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from core.domain import AddObstacle, Position, SetGoal
+from core.domain import Position
+from core.experiments.execution import execute_scenario
 from core.planning import Planner, plan
 from core.simulation import (
     RunReason,
     RunResult,
-    SimulationEngine,
-    SimulationState,
-    run_tick,
 )
 
 
@@ -34,55 +32,9 @@ class ScenarioDefinition:
     expectation: ScenarioExpectation
 
 
-def _make_engine(scenario: ScenarioDefinition) -> SimulationEngine:
-    engine = SimulationEngine(
-        SimulationState.create(
-            width=scenario.width,
-            height=scenario.height,
-            robot_position=scenario.start,
-        ),
-    )
-    engine.apply(SetGoal(goal=scenario.goal))
-    for obstacle in scenario.initial_obstacles:
-        engine.apply(AddObstacle(position=obstacle))
-    return engine
-
-
 def run_scenario(scenario: ScenarioDefinition, planner: Planner = plan) -> RunResult:
-    if scenario.max_ticks <= 0:
-        raise ValueError(f"max_ticks must be > 0, got {scenario.max_ticks}.")
-
-    engine = _make_engine(scenario)
-
-    replans = 0
-    moves = 0
-
-    for _ in range(scenario.max_ticks):
-        for obstacle in scenario.dynamic_obstacles_by_tick.get(engine.state.tick, ()):
-            engine.apply(AddObstacle(position=obstacle))
-
-        tick = run_tick(engine, planner)
-        if tick.replanned:
-            replans += 1
-        if tick.moved:
-            moves += 1
-
-        if tick.done:
-            return RunResult(
-                ticks_executed=engine.state.tick,
-                replans=replans,
-                moves=moves,
-                done=True,
-                reason=tick.reason,
-            )
-
-    return RunResult(
-        ticks_executed=engine.state.tick,
-        replans=replans,
-        moves=moves,
-        done=False,
-        reason="max_ticks",
-    )
+    result, _ = execute_scenario(scenario, planner, max_ticks=scenario.max_ticks)
+    return result
 
 
 def required_scenarios() -> tuple[ScenarioDefinition, ...]:

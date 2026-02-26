@@ -51,11 +51,11 @@ class SimulationEngine:
         self.state.metrics.record_apply_event(tick=self.state.tick, event=event)
         if isinstance(event, InitWorld):
             self._apply_init_world(event)
+            self.state.world_delta.world_reinitialized = True
             return
         if isinstance(event, SetRobotPosition):
             self.state.world.assert_in_bounds(event.position.x, event.position.y)
-            self.state.robot.position = event.position
-            self.state.robot.clear_plan()
+            self.state.robot.set_position(event.position)
             self.state.dirty_replan = self.state.robot.goal is not None
             return
         if isinstance(event, SetGoal):
@@ -66,24 +66,27 @@ class SimulationEngine:
             self.state.dirty_replan = True
             return
         if isinstance(event, ClearGoal):
-            self.state.robot.goal = None
-            self.state.robot.clear_plan()
+            self.state.robot.clear_goal()
             self.state.dirty_replan = False
             return
         if isinstance(event, AddObstacle):
             self.state.world.add_obstacle(event.position)
+            self.state.world_delta.obstacle_cells_changed.add(event.position)
             self.state.dirty_replan = self.state.robot.goal is not None
             return
         if isinstance(event, RemoveObstacle):
             self.state.world.remove_obstacle(event.position)
+            self.state.world_delta.obstacle_cells_changed.add(event.position)
             self.state.dirty_replan = self.state.robot.goal is not None
             return
         if isinstance(event, SetExtraCost):
             self.state.world.set_extra_cost(event.position, event.value)
+            self.state.world_delta.cost_cells_changed.add(event.position)
             self.state.dirty_replan = self.state.robot.goal is not None
             return
         if isinstance(event, ClearExtraCost):
             self.state.world.clear_extra_cost(event.position)
+            self.state.world_delta.cost_cells_changed.add(event.position)
             self.state.dirty_replan = self.state.robot.goal is not None
             return
         if isinstance(event, ResetSimulation):
@@ -144,6 +147,7 @@ class SimulationEngine:
         start_index = 1 if result.path[0] == self.state.robot.position else 0
         self.state.robot.set_path(result.path, start_index=start_index)
         self.state.dirty_replan = False
+        self._clear_world_delta()
         self.state.metrics.record_replan_result(
             tick=self.state.tick,
             replanned=True,
@@ -178,7 +182,7 @@ class SimulationEngine:
             )
             return False
 
-        self.state.robot.position = waypoint
+        self.state.robot.set_position(waypoint, clear_plan=False)
         self.state.robot.advance_waypoint()
         self.state.metrics.record_step(
             tick=self.state.tick,
@@ -199,3 +203,8 @@ class SimulationEngine:
         self.state.dirty_replan = False
         self.state.tick = 0
         self.state.metrics = MetricsRecorder()
+
+    def _clear_world_delta(self) -> None:
+        self.state.world_delta.obstacle_cells_changed.clear()
+        self.state.world_delta.cost_cells_changed.clear()
+        self.state.world_delta.world_reinitialized = False
