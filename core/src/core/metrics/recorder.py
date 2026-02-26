@@ -34,14 +34,6 @@ class TickMetrics:
 
 @dataclass(slots=True)
 class MetricsRecorder:
-    """Collects standardized per-tick and run-level metrics.
-
-    Write responsibilities:
-    - Engine.apply(event): trigger metrics (`replan_trigger_reason`, `obstacle_changes`).
-    - Engine.replan_if_needed(...): planning outcome metrics (`replan_count`, `no_path_events`, path metrics).
-    - Engine.step(): progress metrics (`steps_taken`, `goal_reached`, `ticks_to_goal`, path metrics).
-    """
-
     ticks: list[TickMetrics] = field(default_factory=list)
     replan_count_total: int = 0
     no_path_events_total: int = 0
@@ -70,29 +62,39 @@ class MetricsRecorder:
         current = self._current_tick(tick)
 
         if isinstance(event, SetGoal):
-            self.last_replan_trigger_reason = "set_goal"
+            self.last_replan_trigger_reason = "event"
             current.replan_trigger_reason = self.last_replan_trigger_reason
         elif isinstance(event, SetRobotPosition):
-            self.last_replan_trigger_reason = "set_robot_position"
+            self.last_replan_trigger_reason = "event"
             current.replan_trigger_reason = self.last_replan_trigger_reason
         elif isinstance(event, (AddObstacle, RemoveObstacle)):
             self.obstacle_changes_total += 1
             current.obstacle_changes = self.obstacle_changes_total
-            self.last_replan_trigger_reason = "obstacle_changed"
+            self.last_replan_trigger_reason = "event"
             current.replan_trigger_reason = self.last_replan_trigger_reason
         elif isinstance(event, AddZone):
-            self.last_replan_trigger_reason = f"zone_added:{event.zone_type.value}"
+            self.last_replan_trigger_reason = "event"
             current.replan_trigger_reason = self.last_replan_trigger_reason
         elif isinstance(event, (SetExtraCost, ClearExtraCost)):
-            self.last_replan_trigger_reason = "cost_changed"
+            self.last_replan_trigger_reason = "event"
             current.replan_trigger_reason = self.last_replan_trigger_reason
 
-    def record_replan_result(self, *, tick: int, replanned: bool, found_path: bool, world: World, robot: RobotState) -> None:
+    def record_replan_result(
+        self,
+        *,
+        tick: int,
+        replanned: bool,
+        found_path: bool,
+        world: World,
+        robot: RobotState,
+        reason: str | None,
+    ) -> None:
         current = self._current_tick(tick)
         if replanned:
             self.replan_count_total += 1
             current.replan_count = 1
-            current.replan_trigger_reason = self.last_replan_trigger_reason
+            self.last_replan_trigger_reason = reason
+            current.replan_trigger_reason = reason
             if not found_path:
                 self.no_path_events_total += 1
                 current.no_path_events = self.no_path_events_total
@@ -110,7 +112,6 @@ class MetricsRecorder:
             current.ticks_to_goal = tick
         self._update_path_metrics(current, world, robot)
 
-
     def record_zone_added(self, *, tick: int, zone_type: object, cells: int, duration_ticks: int | None) -> None:
         del zone_type, cells, duration_ticks
         self._current_tick(tick)
@@ -120,8 +121,6 @@ class MetricsRecorder:
         if obstacle_cells or cost_cells:
             self.zone_expirations_total += 1
             current.zone_expirations = self.zone_expirations_total
-            self.last_replan_trigger_reason = "zone_expired"
-            current.replan_trigger_reason = self.last_replan_trigger_reason
 
     def finalize_run_metrics(self) -> dict[str, int | float | bool | str | None]:
         goal_tick = next((item.ticks_to_goal for item in self.ticks if item.goal_reached), None)

@@ -97,12 +97,13 @@ def test_clear_goal_resets_plan_and_dirty_flag() -> None:
     assert engine.state.dirty_replan is False
 
 
-def test_step_without_valid_plan_order_raises_runtime_error() -> None:
+def test_step_without_valid_plan_order_returns_stalled() -> None:
     engine = _make_engine()
     engine.apply(SetGoal(goal=Position(2, 2)))
 
-    with pytest.raises(RuntimeError):
-        engine.step()
+    moved = engine.step()
+
+    assert moved is False
 
 
 def test_replan_without_new_event_is_noop() -> None:
@@ -116,18 +117,16 @@ def test_replan_without_new_event_is_noop() -> None:
     assert engine.state.robot.path == old_path
 
 
-def test_event_during_running_path_requires_fresh_replan() -> None:
+def test_event_during_running_path_can_continue_until_replan() -> None:
     engine = _make_engine()
     engine.apply(SetGoal(goal=Position(4, 4)))
     engine.replan(plan)
 
     assert engine.step() is True
 
-    engine.apply(AddObstacle(position=Position(2, 2)))
+    engine.apply(AddObstacle(position=Position(3, 2)))
 
-    with pytest.raises(RuntimeError):
-        engine.step()
-
+    assert engine.step() is True
     assert engine.replan(plan) is True
 
 

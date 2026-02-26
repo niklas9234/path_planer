@@ -6,6 +6,7 @@ from typing import Literal
 from core.planning import Planner
 from core.planning.astar import NoPath
 from core.simulation.engine import SimulationEngine
+from core.simulation.replan_policy import EventBasedReplanPolicy, ReplanPolicy
 
 RunReason = Literal["running", "goal_reached", "stalled", "max_ticks"]
 
@@ -29,47 +30,48 @@ class RunResult:
     run_metrics: dict[str, int | float | bool | str | None] | None = None
 
 
-def run_tick(engine: SimulationEngine, planner: Planner) -> TickResult:
+def run_tick(
+    engine: SimulationEngine,
+    planner: Planner,
+    *,
+    replan_policy: ReplanPolicy | None = None,
+) -> TickResult:
+    policy = replan_policy or EventBasedReplanPolicy()
     engine.process_tick_updates()
-    try:
-        replanned = engine.replan(planner)
-    except NoPath:
-        return TickResult(
-            replanned=True,
-            moved=False,
-            at_goal=False,
-            done=True,
-            reason="stalled",
+
+    should_replan, replan_reason = policy.should_replan(engine.state)
+    if should_replan:
+        try:
+            replanned = engine.replan(planner, reason=replan_reason)
+        except NoPath:
+            return TickResult(
+                replanned=True,
+                moved=False,
+                at_goal=False,
+                done=True,
+                reason="stalled",
+            )
+    else:
+        replanned = False
+        engine.state.metrics.record_replan_result(
+            tick=engine.state.tick,
+            replanned=False,
+            found_path=bool(engine.state.robot.path),
+            world=engine.state.world,
+            robot=engine.state.robot,
+            reason=None,
         )
 
     moved = engine.step()
     at_goal = engine.state.robot.at_goal()
 
     if at_goal:
-        return TickResult(
-            replanned=replanned,
-            moved=moved,
-            at_goal=True,
-            done=True,
-            reason="goal_reached",
-        )
+        return TickResult(replanned=replanned, moved=moved, at_goal=True, done=True, reason="goal_reached")
 
     if not moved:
-        return TickResult(
-            replanned=replanned,
-            moved=False,
-            at_goal=False,
-            done=True,
-            reason="stalled",
-        )
+        return TickResult(replanned=replanned, moved=False, at_goal=False, done=True, reason="stalled")
 
-    return TickResult(
-        replanned=replanned,
-        moved=True,
-        at_goal=False,
-        done=False,
-        reason="running",
-    )
+    return TickResult(replanned=replanned, moved=True, at_goal=False, done=False, reason="running")
 
 
 def run_until_done(
@@ -77,6 +79,7 @@ def run_until_done(
     planner: Planner,
     *,
     max_ticks: int = 1000,
+    replan_policy: ReplanPolicy | None = None,
 ) -> RunResult:
     if max_ticks <= 0:
         raise ValueError(f"max_ticks must be > 0, got {max_ticks}.")
@@ -85,7 +88,7 @@ def run_until_done(
     moves = 0
 
     for _ in range(max_ticks):
-        tick = run_tick(engine, planner)
+        tick = run_tick(engine, planner, replan_policy=replan_policy)
         if tick.replanned:
             replans += 1
         if tick.moved:

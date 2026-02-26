@@ -31,7 +31,7 @@ def test_metrics_start_goal_obstacle_replanning_finalize() -> None:
 
     metrics = run_result.run_metrics
     assert metrics["replan_count"] == 2
-    assert metrics["replan_trigger_reason"] == "obstacle_changed"
+    assert metrics["replan_trigger_reason"] == "event"
     assert metrics["path_length_current"] == 0
     assert metrics["path_cost_current"] == 0.0
     assert metrics["steps_taken"] == 3

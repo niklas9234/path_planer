@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from core.domain.position import Position
 
@@ -13,6 +13,7 @@ class RobotState:
     path: list[Position] | None = None
     path_index: int = 0
     speed_mps: float = 1.0
+    _remaining_path_set: set[Position] = field(default_factory=set, init=False, repr=False)
 
     def __post_init__(self) -> None:
         if self.path is None:
@@ -21,6 +22,7 @@ class RobotState:
             raise ValueError("path_index must be >= 0.")
         if self.speed_mps <= 0:
             raise ValueError("speed_mps must be > 0.")
+        self._rebuild_remaining_path_set()
 
     def has_goal(self) -> bool:
         return self.goal is not None
@@ -28,6 +30,7 @@ class RobotState:
     def clear_plan(self) -> None:
         self.path.clear()
         self.path_index = 0
+        self._remaining_path_set.clear()
 
     def set_goal(self, goal: Position) -> None:
         self.goal = goal
@@ -47,6 +50,7 @@ class RobotState:
         if start_index < 0:
             raise ValueError("start_index must be >= 0.")
         self.path_index = start_index
+        self._rebuild_remaining_path_set()
 
     def next_waypoint(self) -> Position | None:
         if self.path_index >= len(self.path):
@@ -55,7 +59,18 @@ class RobotState:
 
     def advance_waypoint(self) -> None:
         if self.path_index < len(self.path):
+            visited = self.path[self.path_index]
+            self._remaining_path_set.discard(visited)
             self.path_index += 1
+
+    def remaining_path_cells(self) -> set[Position]:
+        return set(self._remaining_path_set)
+
+    def remaining_path_intersects(self, cells: set[Position]) -> bool:
+        return bool(self._remaining_path_set.intersection(cells))
 
     def at_goal(self) -> bool:
         return self.goal is not None and self.position == self.goal
+
+    def _rebuild_remaining_path_set(self) -> None:
+        self._remaining_path_set = set(self.path[self.path_index :])
