@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from core.domain import AddObstacle, SetGoal
 from typing import TYPE_CHECKING
+
+from core.domain import AddObstacle, SetGoal
 
 if TYPE_CHECKING:
     from core.experiments.scenarios import ScenarioDefinition
