@@ -15,6 +15,8 @@ class NoPath(RuntimeError):
 class PlanResult:
     path: list[Position]
     total_cost: float
+    expanded_nodes: int
+    heap_pops: int
 
 
 def _octile(a: Position, b: Position) -> float:
@@ -54,9 +56,12 @@ def plan(world: World, start: Position, goal: Position) -> PlanResult:
     came_from: dict[Position, Position] = {}
     g_score: dict[Position, float] = {start: 0.0}
     closed: set[Position] = set()
+    heap_pops = 0
+    expanded_nodes = 0
 
     while open_heap:
         _, _, current = heapq.heappop(open_heap)
+        heap_pops += 1
 
         if current in closed:
             continue
@@ -64,9 +69,12 @@ def plan(world: World, start: Position, goal: Position) -> PlanResult:
             return PlanResult(
                 path=_reconstruct_path(came_from, current),
                 total_cost=g_score[current],
+                expanded_nodes=expanded_nodes,
+                heap_pops=heap_pops,
             )
 
         closed.add(current)
+        expanded_nodes += 1
 
         for neighbor_pos, step_cost in world.neighbors(current):
             if neighbor_pos in closed:
