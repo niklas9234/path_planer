@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import random
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
-from core.domain import AddObstacle, SetGoal
+from core.experiments.execution import execute_scenario
 from core.experiments.results import ExperimentResult
 from core.experiments.run_context import RunContext
 from core.experiments.scenarios import ScenarioDefinition, required_scenarios
@@ -13,7 +12,7 @@ from core.metrics.measures import from_run_result
 from core.metrics.recorder import TickMetrics
 from core.planning import plan
 from core.protocol.snapshots import SimulationSnapshot, SnapshotMeta
-from core.simulation import SimulationEngine, SimulationState, run_tick
+from core.simulation import SimulationEngine
 from core.simulation.loop import RunResult
 
 
@@ -25,7 +24,6 @@ def _load_core_version() -> str:
 @dataclass(frozen=True, slots=True)
 class CliRunSummary:
     scenario: str
-    seed: int
     planner: str
     ticks_executed: int
     replans: int
@@ -50,62 +48,13 @@ def _scenario_by_name(name: str) -> ScenarioDefinition:
         raise ValueError(f"Unknown scenario: {name}") from exc
 
 
-def _build_engine(scenario: ScenarioDefinition) -> SimulationEngine:
-    engine = SimulationEngine(
-        SimulationState.create(
-            width=scenario.width,
-            height=scenario.height,
-            robot_position=scenario.start,
-        ),
-    )
-    engine.apply(SetGoal(goal=scenario.goal))
-    for obstacle in scenario.initial_obstacles:
-        engine.apply(AddObstacle(position=obstacle))
-    return engine
-
-
 def _run_scenario_with_engine(
     scenario: ScenarioDefinition,
     *,
     max_ticks: int | None,
 ) -> tuple[RunResult, SimulationEngine]:
-    engine = _build_engine(scenario)
     tick_budget = scenario.max_ticks if max_ticks is None else max_ticks
-
-    replans = 0
-    moves = 0
-
-    for _ in range(tick_budget):
-        for obstacle in scenario.dynamic_obstacles_by_tick.get(engine.state.tick, ()):  # tick before stepping
-            engine.apply(AddObstacle(position=obstacle))
-
-        tick = run_tick(engine, plan)
-        if tick.replanned:
-            replans += 1
-        if tick.moved:
-            moves += 1
-        if tick.done:
-            return (
-                RunResult(
-                    ticks_executed=engine.state.tick,
-                    replans=replans,
-                    moves=moves,
-                    done=True,
-                    reason=tick.reason,
-                ),
-                engine,
-            )
-
-    return (
-        RunResult(
-            ticks_executed=engine.state.tick,
-            replans=replans,
-            moves=moves,
-            done=False,
-            reason="max_ticks",
-        ),
-        engine,
-    )
+    return execute_scenario(scenario, plan, max_ticks=tick_budget)
 
 
 def _tick_to_dict(item: TickMetrics) -> dict[str, int | float | bool | str | None]:
@@ -126,12 +75,10 @@ def _tick_to_dict(item: TickMetrics) -> dict[str, int | float | bool | str | Non
 def run_scenario_experiment(
     *,
     scenario_name: str,
-    seed: int,
     planner: str = "astar",
     max_ticks: int | None = None,
     include_tick_data: bool = False,
 ) -> ScenarioExperimentResult:
-    random.seed(seed)
     if planner != "astar":
         raise ValueError(f"Unsupported planner: {planner}")
 
@@ -141,7 +88,6 @@ def run_scenario_experiment(
 
     summary = CliRunSummary(
         scenario=scenario.name,
-        seed=seed,
         planner=planner,
         ticks_executed=run_result.ticks_executed,
         replans=run_result.replans,
@@ -154,11 +100,13 @@ def run_scenario_experiment(
     tick_metrics = [_tick_to_dict(item) for item in engine.state.metrics.ticks if item.tick > 0]
 
     snapshot: dict[str, object] = {
-        "meta": {"tick": run_result.ticks_executed, "scenario": scenario.name, "seed": seed},
+        "meta": {"tick": run_result.ticks_executed, "scenario": scenario.name},
         "world": {"width": scenario.width, "height": scenario.height},
         "robot": {
             "position": {"x": engine.state.robot.position.x, "y": engine.state.robot.position.y},
-            "goal": {"x": scenario.goal.x, "y": scenario.goal.y},
+            "goal": None
+            if engine.state.robot.goal is None
+            else {"x": engine.state.robot.goal.x, "y": engine.state.robot.goal.y},
         },
     }
 
@@ -172,18 +120,15 @@ def run_scenario_experiment(
 def run_experiment(
     scenario: ScenarioDefinition,
     *,
-    seed: int,
     planner_name: str = "astar",
     planner_params: Mapping[str, Any] | None = None,
     world_params: Mapping[str, Any] | None = None,
     recorder: object | None = None,
 ) -> ExperimentResult:
     del recorder
-    random.seed(seed)
 
     context = RunContext.create(
         scenario_name=scenario.name,
-        seed=seed,
         planner_name=planner_name,
         planner_params=planner_params,
         world_params=world_params,
@@ -199,7 +144,7 @@ def run_experiment(
     snapshot = SimulationSnapshot(
         meta=SnapshotMeta(run_id=context.run_id, tick=run_result.ticks_executed),
         robot_position=engine.state.robot.position,
-        goal_position=scenario.goal,
+        goal_position=engine.state.robot.goal,
     )
     return ExperimentResult(
         run_context=context,

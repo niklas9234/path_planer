@@ -9,11 +9,11 @@ def _scenario_by_name(name: str):
     return scenarios[name]
 
 
-def test_run_experiment_is_reproducible_for_fixed_seed() -> None:
+def test_run_experiment_is_reproducible_for_fixed_inputs() -> None:
     scenario = _scenario_by_name("replan_after_obstacle")
 
-    first = run_experiment(scenario, seed=1337)
-    second = run_experiment(scenario, seed=1337)
+    first = run_experiment(scenario)
+    second = run_experiment(scenario)
 
     assert first.run_context.run_id == second.run_context.run_id
     assert first.run_result == second.run_result
@@ -26,7 +26,7 @@ def test_run_experiment_is_reproducible_for_fixed_seed() -> None:
 def test_run_context_available_in_metrics_and_exports() -> None:
     scenario = _scenario_by_name("empty_world_reaches_goal")
 
-    result = run_experiment(scenario, seed=7)
+    result = run_experiment(scenario)
     payload = result.to_export_dict()
 
     assert result.metrics.run_context is result.run_context

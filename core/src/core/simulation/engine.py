@@ -54,8 +54,7 @@ class SimulationEngine:
             return
         if isinstance(event, SetRobotPosition):
             self.state.world.assert_in_bounds(event.position.x, event.position.y)
-            self.state.robot.position = event.position
-            self.state.robot.clear_plan()
+            self.state.robot.set_position(event.position)
             self.state.dirty_replan = self.state.robot.goal is not None
             return
         if isinstance(event, SetGoal):
@@ -66,8 +65,7 @@ class SimulationEngine:
             self.state.dirty_replan = True
             return
         if isinstance(event, ClearGoal):
-            self.state.robot.goal = None
-            self.state.robot.clear_plan()
+            self.state.robot.clear_goal()
             self.state.dirty_replan = False
             return
         if isinstance(event, AddObstacle):
@@ -178,7 +176,7 @@ class SimulationEngine:
             )
             return False
 
-        self.state.robot.position = waypoint
+        self.state.robot.set_position(waypoint, clear_plan=False)
         self.state.robot.advance_waypoint()
         self.state.metrics.record_step(
             tick=self.state.tick,

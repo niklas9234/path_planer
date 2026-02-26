@@ -21,7 +21,6 @@ class ExperimentResult:
             "run_context": {
                 "run_id": self.run_context.run_id,
                 "scenario_name": self.run_context.scenario_name,
-                "seed": self.run_context.seed,
                 "planner_name": self.run_context.planner_name,
                 "planner_params": dict(self.run_context.planner_params),
                 "world_params": dict(self.run_context.world_params),
