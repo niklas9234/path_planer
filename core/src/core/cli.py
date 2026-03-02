@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 from core.experiments.result_store import save_json, stable_filename
 from core.experiments.runner import run_scenario_experiment
@@ -77,6 +77,13 @@ def _parse_policy_params(raw_items: list[str], periodic_interval: int | None) ->
     return params
 
 
+def _format_policy_display(policy_name: str, policy_params: Mapping[str, object]) -> str:
+    if not policy_params:
+        return policy_name
+    rendered = ", ".join(f"{key}={value}" for key, value in sorted(policy_params.items()))
+    return f"{policy_name} ({rendered})"
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
@@ -125,7 +132,7 @@ def main(argv: list[str] | None = None) -> int:
                 f"Goal erreicht={result.summary.goal_reached}",
                 f"Ticks={result.summary.ticks_executed}",
                 f"Replans={result.summary.replans}",
-                f"Policy={result.summary.policy_name}",
+                f"Policy={_format_policy_display(result.summary.policy_name, result.summary.policy_params)}",
                 f"Kosten={result.summary.total_cost:.3f}",
             ],
         ),

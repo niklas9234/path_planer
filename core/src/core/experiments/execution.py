@@ -47,7 +47,7 @@ def execute_scenario(
 ) -> tuple[RunResult, SimulationEngine]:
     effective_policy_name = policy_name or scenario.policy_name
     effective_policy_params = {**scenario.policy_params, **(dict(policy_params or {}))}
-    replan_policy = _policy_from_name(effective_policy_name, effective_policy_params)
+    replan_policy = make_policy(effective_policy_name, dict(effective_policy_params))
 
     return run_once(
         scenario,
@@ -55,6 +55,7 @@ def execute_scenario(
         planner=planner,
         max_ticks=max_ticks,
         policy_name=effective_policy_name,
+        policy_params=effective_policy_params,
     )
 
 
@@ -68,6 +69,7 @@ def run_once(
     planner: Planner,
     max_ticks: int,
     policy_name: str | None = None,
+    policy_params: Mapping[str, object] | None = None,
 ) -> tuple[RunResult, SimulationEngine]:
     if max_ticks <= 0:
         raise ValueError(f"max_ticks must be > 0, got {max_ticks}.")
@@ -78,6 +80,7 @@ def run_once(
     replans = 0
     moves = 0
     resolved_policy_name = policy_name or scenario.policy_name
+    resolved_policy_params = dict(policy_params or scenario.policy_params)
 
     for _ in range(max_ticks):
         if events := scenario.scheduled_events.get(engine.state.tick, ()):
@@ -129,6 +132,7 @@ def run_once(
                 RunResult(
                     scenario_name=scenario.name,
                     policy_name=resolved_policy_name,
+                    policy_params=resolved_policy_params,
                     seed=None,
                     ticks_executed=engine.state.tick,
                     replans=1,
@@ -155,6 +159,7 @@ def run_once(
                 RunResult(
                     scenario_name=scenario.name,
                     policy_name=resolved_policy_name,
+                    policy_params=resolved_policy_params,
                     seed=None,
                     ticks_executed=engine.state.tick,
                     replans=replans,
@@ -175,9 +180,14 @@ def run_once(
         reason="max_ticks",
     )
     return (
-        RunResult(
+        run_until_done(
+            engine,
+            planner,
+            max_ticks=max_ticks,
+            replan_policy=policy,
             scenario_name=scenario.name,
             policy_name=resolved_policy_name,
+            policy_params=resolved_policy_params,
             seed=None,
             ticks_executed=engine.state.tick,
             replans=replans,
