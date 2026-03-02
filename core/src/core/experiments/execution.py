@@ -82,11 +82,16 @@ def run_once(
         except NoPath:
             return (
                 RunResult(
+                    scenario_name=scenario.name,
+                    policy_name=type(policy).__name__,
+                    seed=None,
                     ticks_executed=engine.state.tick,
                     replans=1,
                     moves=0,
                     done=True,
                     reason="stalled",
+                    goal_reached=False,
+                    stalled=True,
                 ),
                 engine,
             )
@@ -104,22 +109,32 @@ def run_once(
         if tick.done:
             return (
                 RunResult(
+                    scenario_name=scenario.name,
+                    policy_name=type(policy).__name__,
+                    seed=None,
                     ticks_executed=engine.state.tick,
                     replans=replans,
                     moves=moves,
                     done=True,
                     reason=tick.reason,
+                    goal_reached=tick.reason == "goal_reached",
+                    stalled=tick.reason == "stalled",
                 ),
                 engine,
             )
 
     return (
         RunResult(
+            scenario_name=scenario.name,
+            policy_name=type(policy).__name__,
+            seed=None,
             ticks_executed=engine.state.tick,
             replans=replans,
             moves=moves,
             done=False,
             reason="max_ticks",
+            goal_reached=False,
+            stalled=False,
         ),
         engine,
     )

@@ -27,13 +27,7 @@ class ExperimentResult:
                 "started_at": self.run_context.started_at.isoformat(),
                 "core_version": self.run_context.core_version,
             },
-            "run_result": {
-                "ticks_executed": self.run_result.ticks_executed,
-                "replans": self.run_result.replans,
-                "moves": self.run_result.moves,
-                "done": self.run_result.done,
-                "reason": self.run_result.reason,
-            },
+            "run_result": self.run_result.to_dict(),
             "metrics": {
                 "run_id": self.metrics.run_context.run_id,
                 "ticks_executed": self.metrics.ticks_executed,
