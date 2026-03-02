@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from core.domain import Position, ZoneType
+from core.domain import AddObstacle, AddZone, DomainEvent, Position, ZoneType
 from core.experiments.execution import execute_scenario
 from core.planning import Planner, plan
 from core.simulation import (
@@ -23,16 +23,31 @@ class ScenarioExpectation:
 @dataclass(frozen=True, slots=True)
 class ScenarioDefinition:
     name: str
-    width: int
-    height: int
+    world_config: WorldConfig
     start: Position
     goal: Position
     initial_obstacles: tuple[Position, ...]
+    initial_zones: tuple[ZoneDefinition, ...]
     max_ticks: int
-    dynamic_obstacles_by_tick: dict[int, tuple[Position, ...]]
-    dynamic_zones_by_tick: dict[int, tuple[tuple[ZoneType, tuple[Position, ...], int | None, float], ...]]
+    scheduled_events: dict[int, tuple[DomainEvent, ...]]
     expectation: ScenarioExpectation
     replan_mode: Literal["dynamic_event", "static_once"] = "dynamic_event"
+
+
+@dataclass(frozen=True, slots=True)
+class WorldConfig:
+    width: int
+    height: int
+    base_cost: float = 1.0
+    cell_size_m: float = 1.0
+
+
+@dataclass(frozen=True, slots=True)
+class ZoneDefinition:
+    zone_type: ZoneType
+    cells: tuple[Position, ...]
+    duration_ticks: int | None = None
+    extra_cost: float = 0.0
 
 
 def run_scenario(scenario: ScenarioDefinition, planner: Planner = plan) -> RunResult:
@@ -44,14 +59,13 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
     return (
         ScenarioDefinition(
             name="empty_world_reaches_goal",
-            width=5,
-            height=5,
+            world_config=WorldConfig(width=5, height=5),
             start=Position(0, 0),
             goal=Position(4, 4),
             initial_obstacles=(),
+            initial_zones=(),
             max_ticks=20,
-            dynamic_obstacles_by_tick={},
-            dynamic_zones_by_tick={},
+            scheduled_events={},
             expectation=ScenarioExpectation(
                 allowed_reasons=("goal_reached",),
                 min_moves=1,
@@ -59,8 +73,7 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
         ),
         ScenarioDefinition(
             name="blocked_goal_stalls",
-            width=3,
-            height=3,
+            world_config=WorldConfig(width=3, height=3),
             start=Position(0, 0),
             goal=Position(2, 2),
             initial_obstacles=(
@@ -68,9 +81,9 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
                 Position(1, 0),
                 Position(0, 1),
             ),
+            initial_zones=(),
             max_ticks=10,
-            dynamic_obstacles_by_tick={},
-            dynamic_zones_by_tick={},
+            scheduled_events={},
             expectation=ScenarioExpectation(
                 allowed_reasons=("stalled",),
                 min_moves=0,
@@ -79,16 +92,13 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
         ),
         ScenarioDefinition(
             name="replan_after_obstacle",
-            width=5,
-            height=3,
+            world_config=WorldConfig(width=5, height=3),
             start=Position(0, 0),
             goal=Position(4, 0),
             initial_obstacles=(),
+            initial_zones=(),
             max_ticks=20,
-            dynamic_obstacles_by_tick={
-                1: (Position(2, 0),),
-            },
-            dynamic_zones_by_tick={},
+            scheduled_events={1: (AddObstacle(position=Position(2, 0)),)},
             expectation=ScenarioExpectation(
                 allowed_reasons=("goal_reached", "stalled"),
                 min_replans=1,
@@ -96,15 +106,21 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
         ),
         ScenarioDefinition(
             name="temporary_slow_zone_expires",
-            width=6,
-            height=3,
+            world_config=WorldConfig(width=6, height=3),
             start=Position(0, 1),
             goal=Position(5, 1),
             initial_obstacles=(),
+            initial_zones=(),
             max_ticks=20,
-            dynamic_obstacles_by_tick={},
-            dynamic_zones_by_tick={
-                0: ((ZoneType.SLOW, (Position(1, 1), Position(2, 1)), 2, 3.0),),
+            scheduled_events={
+                0: (
+                    AddZone(
+                        zone_type=ZoneType.SLOW,
+                        cells=(Position(1, 1), Position(2, 1)),
+                        duration_ticks=2,
+                        extra_cost=3.0,
+                    ),
+                ),
             },
             expectation=ScenarioExpectation(
                 allowed_reasons=("goal_reached",),
@@ -113,22 +129,20 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
         ),
         ScenarioDefinition(
             name="max_ticks_guard",
-            width=5,
-            height=5,
+            world_config=WorldConfig(width=5, height=5),
             start=Position(0, 0),
             goal=Position(4, 4),
             initial_obstacles=(),
+            initial_zones=(),
             max_ticks=1,
-            dynamic_obstacles_by_tick={},
-            dynamic_zones_by_tick={},
+            scheduled_events={},
             expectation=ScenarioExpectation(
                 allowed_reasons=("max_ticks",),
             ),
         ),
         ScenarioDefinition(
             name="testpath_20x20_image_map",
-            width=20,
-            height=20,
+            world_config=WorldConfig(width=20, height=20),
             start=Position(3, 19),
             goal=Position(12, 0),
             initial_obstacles=(
@@ -175,27 +189,20 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
                 Position(13, 18),
                 Position(12, 19),
             ),
+            initial_zones=(
+                ZoneDefinition(zone_type=ZoneType.SLOW, cells=(Position(3, 1), Position(3, 2), Position(3, 3)), extra_cost=3.0),
+                ZoneDefinition(zone_type=ZoneType.SLOW, cells=(Position(7, 4),), extra_cost=3.0),
+                ZoneDefinition(zone_type=ZoneType.SLOW, cells=(Position(9, 5), Position(10, 6)), extra_cost=3.0),
+                ZoneDefinition(zone_type=ZoneType.SLOW, cells=(Position(15, 5), Position(16, 5), Position(17, 5), Position(18, 5)), extra_cost=3.0),
+                ZoneDefinition(zone_type=ZoneType.SLOW, cells=(Position(14, 2), Position(15, 2), Position(16, 2)), extra_cost=3.0),
+                ZoneDefinition(zone_type=ZoneType.SLOW, cells=(Position(3, 8), Position(4, 8), Position(5, 8)), extra_cost=3.0),
+                ZoneDefinition(zone_type=ZoneType.SLOW, cells=(Position(10, 11), Position(11, 12), Position(12, 13)), extra_cost=3.0),
+                ZoneDefinition(zone_type=ZoneType.SLOW, cells=(Position(10, 16), Position(11, 17)), extra_cost=3.0),
+            ),
             max_ticks=400,
-            dynamic_obstacles_by_tick={
-                # Additional dynamic obstacle near the upper barrier.
-                9: (Position(15, 2),),
-            },
-            dynamic_zones_by_tick={
-                # Gray cells from the reference map represented as slow zones.
-                0: (
-                    (ZoneType.SLOW, (Position(3, 1), Position(3, 2), Position(3, 3)), None, 3.0), 
-                    (ZoneType.SLOW, (Position(7, 4),), None, 3.0),
-                    (ZoneType.SLOW, (Position(9, 5), Position(10, 6)), None, 3.0),
-                    (ZoneType.SLOW, (Position(15, 5), Position(16, 5), Position(17, 5), Position(18, 5)), None, 3.0),  
-                    (ZoneType.SLOW, (Position(14, 2), Position(15, 2), Position(16, 2)), None, 3.0),  
-                    (ZoneType.SLOW, (Position(3, 8), Position(4, 8), Position(5, 8)), None, 3.0),
-                    (ZoneType.SLOW, (Position(10, 11), Position(11, 12), Position(12, 13)), None, 3.0),
-                    (ZoneType.SLOW, (Position(10, 16), Position(11, 17)), None, 3.0),
-                ),
-                # Extra late slow zone near a barrier so the robot has to adapt shortly before passing it.
-                8: (
-                    (ZoneType.SLOW, (Position(14, 1), Position(15, 1), Position(16, 1)), 8, 5.0),
-                ),
+            scheduled_events={
+                8: (AddZone(zone_type=ZoneType.SLOW, cells=(Position(14, 1), Position(15, 1), Position(16, 1)), duration_ticks=8, extra_cost=5.0),),
+                9: (AddObstacle(position=Position(15, 2)),),
             },
             expectation=ScenarioExpectation(
                 allowed_reasons=("goal_reached", "stalled", "max_ticks"),
@@ -209,6 +216,8 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
 __all__ = [
     "ScenarioDefinition",
     "ScenarioExpectation",
+    "WorldConfig",
+    "ZoneDefinition",
     "required_scenarios",
     "run_scenario",
 ]

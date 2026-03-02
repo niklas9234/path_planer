@@ -1,7 +1,13 @@
 from __future__ import annotations
 
-from core.domain import Position
-from core.experiments import ScenarioDefinition, ScenarioExpectation, required_scenarios, run_scenario
+from core.domain import AddObstacle, Position
+from core.experiments import (
+    ScenarioDefinition,
+    ScenarioExpectation,
+    WorldConfig,
+    required_scenarios,
+    run_scenario,
+)
 
 
 def _scenario_by_name(name: str):
@@ -55,14 +61,13 @@ def test_temporary_slow_zone_expires() -> None:
 
 def test_replan_mode_static_once_vs_dynamic_event() -> None:
     base_kwargs = dict(
-        width=5,
-        height=3,
+        world_config=WorldConfig(width=5, height=3),
         start=Position(0, 0),
         goal=Position(4, 0),
         initial_obstacles=(),
+        initial_zones=(),
         max_ticks=20,
-        dynamic_obstacles_by_tick={1: (Position(2, 0),)},
-        dynamic_zones_by_tick={},
+        scheduled_events={1: (AddObstacle(position=Position(2, 0)),)},
         expectation=ScenarioExpectation(allowed_reasons=("goal_reached", "stalled")),
     )
     dynamic_scenario = ScenarioDefinition(
