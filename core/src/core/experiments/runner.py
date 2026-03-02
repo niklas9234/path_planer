@@ -93,7 +93,7 @@ def run_scenario_experiment(
         replans=run_result.replans,
         moves=run_result.moves,
         reason=run_result.reason,
-        goal_reached=run_result.reason == "goal_reached",
+        goal_reached=run_result.goal_reached if run_result.goal_reached is not None else run_result.reason == "goal_reached",
         total_cost=float(finalized.get("total_travel_cost", 0.0)),
     )
 
@@ -101,7 +101,7 @@ def run_scenario_experiment(
 
     snapshot: dict[str, object] = {
         "meta": {"tick": run_result.ticks_executed, "scenario": scenario.name},
-        "world": {"width": scenario.width, "height": scenario.height},
+        "world": {"width": scenario.world_config.width, "height": scenario.world_config.height},
         "robot": {
             "position": {"x": engine.state.robot.position.x, "y": engine.state.robot.position.y},
             "goal": None

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import asdict
 from dataclasses import dataclass
 from typing import Literal
 
@@ -22,12 +23,23 @@ class TickResult:
 
 @dataclass(frozen=True, slots=True)
 class RunResult:
+    scenario_name: str | None
+    policy_name: str | None
+    seed: int | None
     ticks_executed: int
     replans: int
     moves: int
     done: bool
     reason: RunReason
+    goal_reached: bool | None = None
+    stalled: bool | None = None
     run_metrics: dict[str, int | float | bool | str | None] | None = None
+
+    def to_dict(self) -> dict[str, int | float | bool | str | None | dict[str, int | float | bool | str | None]]:
+        payload = asdict(self)
+        payload["goal_reached"] = self.goal_reached if self.goal_reached is not None else self.reason == "goal_reached"
+        payload["stalled"] = self.stalled if self.stalled is not None else self.reason == "stalled"
+        return payload
 
 
 def run_tick(
@@ -80,6 +92,9 @@ def run_until_done(
     *,
     max_ticks: int = 1000,
     replan_policy: ReplanPolicy | None = None,
+    scenario_name: str | None = None,
+    policy_name: str | None = None,
+    seed: int | None = None,
 ) -> RunResult:
     if max_ticks <= 0:
         raise ValueError(f"max_ticks must be > 0, got {max_ticks}.")
@@ -96,19 +111,29 @@ def run_until_done(
 
         if tick.done:
             return RunResult(
+                scenario_name=scenario_name,
+                policy_name=policy_name or type(replan_policy or EventBasedReplanPolicy()).__name__,
+                seed=seed,
                 ticks_executed=engine.state.tick,
                 replans=replans,
                 moves=moves,
                 done=True,
                 reason=tick.reason,
+                goal_reached=tick.reason == "goal_reached",
+                stalled=tick.reason == "stalled",
                 run_metrics=engine.state.metrics.finalize_run_metrics(),
             )
 
     return RunResult(
+        scenario_name=scenario_name,
+        policy_name=policy_name or type(replan_policy or EventBasedReplanPolicy()).__name__,
+        seed=seed,
         ticks_executed=engine.state.tick,
         replans=replans,
         moves=moves,
         done=False,
         reason="max_ticks",
+        goal_reached=False,
+        stalled=False,
         run_metrics=engine.state.metrics.finalize_run_metrics(),
     )
