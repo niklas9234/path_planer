@@ -81,3 +81,35 @@ def test_cli_optionally_emits_ticks_and_snapshot(tmp_path) -> None:
     assert len(metrics_payload["ticks"]) == metrics_payload["summary"]["ticks_executed"]
     assert snapshot_payload["world"]["width"] == 5
     assert snapshot_payload["robot"]["position"]
+
+
+def test_cli_accepts_policy_overrides_and_emits_policy_name(tmp_path) -> None:
+    metrics_path = tmp_path / "metrics.json"
+
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "core.cli",
+            "run-scenario",
+            "--scenario",
+            "empty_world_reaches_goal",
+            "--planner",
+            "astar",
+            "--policy",
+            "periodic",
+            "--policy-param",
+            "interval=5",
+            "--max-ticks",
+            "20",
+            "--metrics-out",
+            str(metrics_path),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=_cli_env(),
+    )
+
+    payload = json.loads(metrics_path.read_text(encoding="utf-8"))
+    assert payload["summary"]["policy_name"] == "periodic"

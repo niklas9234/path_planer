@@ -25,6 +25,7 @@ def _load_core_version() -> str:
 class CliRunSummary:
     scenario: str
     planner: str
+    policy_name: str
     ticks_executed: int
     replans: int
     moves: int
@@ -52,9 +53,17 @@ def _run_scenario_with_engine(
     scenario: ScenarioDefinition,
     *,
     max_ticks: int | None,
+    policy_name: str | None = None,
+    policy_params: Mapping[str, object] | None = None,
 ) -> tuple[RunResult, SimulationEngine]:
     tick_budget = scenario.max_ticks if max_ticks is None else max_ticks
-    return execute_scenario(scenario, plan, max_ticks=tick_budget)
+    return execute_scenario(
+        scenario,
+        plan,
+        max_ticks=tick_budget,
+        policy_name=policy_name,
+        policy_params=policy_params,
+    )
 
 
 def _tick_to_dict(item: TickMetrics) -> dict[str, int | float | bool | str | None]:
@@ -76,6 +85,8 @@ def run_scenario_experiment(
     *,
     scenario_name: str,
     planner: str = "astar",
+    policy_name: str | None = None,
+    policy_params: Mapping[str, object] | None = None,
     max_ticks: int | None = None,
     include_tick_data: bool = False,
 ) -> ScenarioExperimentResult:
@@ -83,12 +94,21 @@ def run_scenario_experiment(
         raise ValueError(f"Unsupported planner: {planner}")
 
     scenario = _scenario_by_name(scenario_name)
-    run_result, engine = _run_scenario_with_engine(scenario, max_ticks=max_ticks)
+    effective_policy_name = policy_name or scenario.policy_name
+    effective_policy_params = {**scenario.policy_params, **(dict(policy_params or {}))}
+
+    run_result, engine = _run_scenario_with_engine(
+        scenario,
+        max_ticks=max_ticks,
+        policy_name=effective_policy_name,
+        policy_params=effective_policy_params,
+    )
     finalized = engine.state.metrics.finalize_run_metrics()
 
     summary = CliRunSummary(
         scenario=scenario.name,
         planner=planner,
+        policy_name=run_result.policy_name or effective_policy_name,
         ticks_executed=run_result.ticks_executed,
         replans=run_result.replans,
         moves=run_result.moves,
