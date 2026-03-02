@@ -24,15 +24,31 @@ def make_context(**overrides: object) -> PolicyContext:
     return PolicyContext(**base)
 
 
-def test_event_based_replan_policy_requires_goal_and_dirty_flag() -> None:
+def test_event_based_replan_policy_replans_for_dirty_goal_context() -> None:
     policy = EventBasedReplanPolicy()
 
     decision = policy.decide(make_context(dirty_replan=True))
+
     assert decision.replan is True
     assert decision.reason == "event"
 
-    no_goal = policy.decide(make_context(dirty_replan=True, has_goal=False))
-    assert no_goal.replan is False
+
+def test_event_based_replan_policy_does_not_replan_without_goal() -> None:
+    policy = EventBasedReplanPolicy()
+
+    decision = policy.decide(make_context(dirty_replan=True, has_goal=False))
+
+    assert decision.replan is False
+    assert decision.reason == ""
+
+
+def test_event_based_replan_policy_does_not_replan_without_dirty_flag() -> None:
+    policy = EventBasedReplanPolicy()
+
+    decision = policy.decide(make_context(dirty_replan=False, has_goal=True))
+
+    assert decision.replan is False
+    assert decision.reason == ""
 
 
 def test_static_once_replan_policy_replans_only_once() -> None:
