@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "tick": 4,
+    "scenario": "replan_after_obstacle"
+  },
+  "world": {
+    "width": 5,
+    "height": 3
+  },
+  "robot": {
+    "position": {
+      "x": 4,
+      "y": 0
+    },
+    "goal": {
+      "x": 4,
+      "y": 0
+    }
+  }
+}

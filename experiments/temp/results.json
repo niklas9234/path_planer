@@ -1,0 +1,12 @@
+{
+  "summary": {
+    "scenario": "testpath_20x20_image_map",
+    "planner": "astar",
+    "ticks_executed": 19,
+    "replans": 4,
+    "moves": 19,
+    "reason": "goal_reached",
+    "goal_reached": true,
+    "total_cost": 19.0
+  }
+}
