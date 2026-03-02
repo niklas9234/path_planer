@@ -7,6 +7,7 @@ from core.simulation import (
     NoReplanPolicy,
     PathAffectedReplanPolicy,
     PeriodicReplanPolicy,
+    StaticOnceReplanPolicy,
     SimulationEngine,
     SimulationState,
     run_tick,
@@ -63,6 +64,37 @@ def test_path_affected_policy_replans_only_when_remaining_path_cut() -> None:
 
     assert unaffected.replanned is False
     assert affected.replanned is True
+
+
+def test_static_once_policy_replans_initial_dirty_goal_only_once() -> None:
+    engine = _make_engine()
+    policy = StaticOnceReplanPolicy()
+
+    engine.apply(SetGoal(goal=Position(4, 4)))
+    first = run_tick(engine, plan, replan_policy=policy)
+
+    engine.apply(AddObstacle(position=Position(2, 0)))
+    second = run_tick(engine, plan, replan_policy=policy)
+
+    assert first.replanned is True
+    assert first.moved is True
+    assert second.replanned is False
+
+
+def test_static_once_policy_ignores_late_dirty_events_in_run_until_done() -> None:
+    engine = _make_engine(width=6, height=3)
+    policy = StaticOnceReplanPolicy()
+
+    engine.apply(SetGoal(goal=Position(5, 0)))
+    initial = run_tick(engine, plan, replan_policy=policy)
+    engine.apply(AddObstacle(position=Position(0, 2)))
+
+    result = run_until_done(engine, plan, replan_policy=policy, max_ticks=20)
+
+    assert initial.replanned is True
+    assert initial.moved is True
+    assert result.done is True
+    assert initial.replanned + result.replans == 1
 
 
 def test_no_replan_policy_keeps_existing_path_when_event_marks_dirty() -> None:
