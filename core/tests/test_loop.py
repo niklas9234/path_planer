@@ -4,6 +4,7 @@ import pytest
 from core.domain import AddObstacle, Position, SetGoal
 from core.planning import plan
 from core.simulation import (
+    NoReplanPolicy,
     PathAffectedReplanPolicy,
     PeriodicReplanPolicy,
     SimulationEngine,
@@ -62,6 +63,24 @@ def test_path_affected_policy_replans_only_when_remaining_path_cut() -> None:
 
     assert unaffected.replanned is False
     assert affected.replanned is True
+
+
+def test_no_replan_policy_keeps_existing_path_when_event_marks_dirty() -> None:
+    engine = _make_engine()
+    engine.apply(SetGoal(goal=Position(4, 4)))
+    run_tick(engine, plan)
+
+    planned_path = list(engine.state.robot.path)
+    planned_index = engine.state.robot.path_index
+
+    engine.apply(AddObstacle(position=Position(4, 0)))
+    tick = run_tick(engine, plan, replan_policy=NoReplanPolicy())
+
+    assert tick.replanned is False
+    assert engine.state.dirty_replan is True
+    assert "obstacle_changed" in engine.state.replan_events
+    assert engine.state.robot.path == planned_path
+    assert engine.state.robot.path_index == planned_index + 1
 
 
 def test_run_until_done_reaches_goal() -> None:
