@@ -66,3 +66,12 @@ def test_periodic_runner_replans_minimally_without_changes_and_by_next_interval_
 
     assert no_change_result.replans == 1
     assert with_change_result.replans >= 2
+
+
+def test_run_result_tracks_policy_impl_module() -> None:
+    scenario = _scenario_by_name("empty_world_reaches_goal")
+
+    result = run_experiment(scenario)
+
+    assert result.run_result.policy_impl_module == "core.simulation.replan_policy"
+    assert result.to_export_dict()["run_result"]["policy_impl_module"] == "core.simulation.replan_policy"

@@ -73,6 +73,7 @@ def run_once(
     engine = build_engine_for_scenario(scenario)
     resolved_policy_name = policy_name or scenario.policy_name
     resolved_policy_params = dict(policy_params or scenario.policy_params)
+    policy_impl_module = type(policy).__module__
 
     replans = 0
     moves = 0
@@ -99,6 +100,7 @@ def run_once(
                         scenario_name=scenario.name,
                         policy_name=resolved_policy_name,
                         policy_params=resolved_policy_params,
+                        policy_impl_module=policy_impl_module,
                         seed=None,
                         ticks_executed=engine.state.tick,
                         replans=replans + 1,
@@ -130,6 +132,7 @@ def run_once(
                     scenario_name=scenario.name,
                     policy_name=resolved_policy_name,
                     policy_params=resolved_policy_params,
+                    policy_impl_module=policy_impl_module,
                     seed=None,
                     ticks_executed=engine.state.tick,
                     replans=replans,
@@ -155,6 +158,7 @@ def run_once(
                     scenario_name=scenario.name,
                     policy_name=resolved_policy_name,
                     policy_params=resolved_policy_params,
+                    policy_impl_module=policy_impl_module,
                     seed=None,
                     ticks_executed=engine.state.tick,
                     replans=replans,
@@ -179,6 +183,7 @@ def run_once(
             scenario_name=scenario.name,
             policy_name=resolved_policy_name,
             policy_params=resolved_policy_params,
+            policy_impl_module=policy_impl_module,
             seed=None,
             ticks_executed=engine.state.tick,
             replans=replans,
