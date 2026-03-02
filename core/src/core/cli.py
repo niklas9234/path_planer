@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import argparse
-import json
 from dataclasses import asdict
 from pathlib import Path
 
+from core.experiments.result_store import save_json, stable_filename
 from core.experiments.runner import run_scenario_experiment
 
 
@@ -24,12 +24,6 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Include per-tick metrics in JSON output",
     )
     return parser
-
-
-def _write_json(path: str | Path, payload: dict[str, object]) -> None:
-    target = Path(path)
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -52,10 +46,20 @@ def main(argv: list[str] | None = None) -> int:
     if args.include_ticks:
         metrics_payload["ticks"] = result.tick_metrics
 
-    _write_json(args.metrics_out, metrics_payload)
+    metrics_out = Path(args.metrics_out)
+    save_json(
+        metrics_payload,
+        metrics_out.parent,
+        filename_strategy=stable_filename(metrics_out.name),
+    )
 
     if args.snapshot_out:
-        _write_json(args.snapshot_out, result.snapshot)
+        snapshot_out = Path(args.snapshot_out)
+        save_json(
+            result.snapshot,
+            snapshot_out.parent,
+            filename_strategy=stable_filename(snapshot_out.name),
+        )
 
     print(
         " | ".join(
