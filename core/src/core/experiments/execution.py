@@ -49,8 +49,7 @@ def execute_scenario(
     *,
     max_ticks: int,
 ) -> tuple[RunResult, SimulationEngine]:
-    policy_name = scenario.replan_mode
-    replan_policy: ReplanPolicy = make_policy(policy_name)
+    replan_policy = _policy_from_scenario(scenario)
 
     return run_once(
         scenario,
@@ -59,6 +58,20 @@ def execute_scenario(
         max_ticks=max_ticks,
     )
 
+
+
+
+def _policy_from_scenario(scenario: ScenarioDefinition) -> ReplanPolicy:
+    policy_name = scenario.policy_name
+    if scenario.replan_mode is not None and not policy_name:
+        policy_name = "static_once" if scenario.replan_mode == "static_once" else "event_based"
+
+    if policy_name == "static_once":
+        return NoReplanPolicy()
+    if policy_name == "event_based":
+        return EventBasedReplanPolicy()
+
+    raise ValueError(f"Unsupported policy_name '{scenario.policy_name}' for scenario '{scenario.name}'.")
 
 def run_once(
     scenario: ScenarioDefinition,
@@ -73,57 +86,9 @@ def run_once(
     replans = 0
     moves = 0
 
-    for _ in range(max_ticks):
-        for event in scenario.scheduled_events.get(engine.state.tick, ()):
-            engine.apply(event)
-
-        obstacle_cells, cost_cells = engine.process_tick_updates()
-        engine.state.metrics.on_tick_start(
-            tick=engine.state.tick,
-            world=engine.state.world,
-            robot=engine.state.robot,
-            zone_expired_obstacle_cells=obstacle_cells,
-            zone_expired_cost_cells=cost_cells,
-        )
-
-        decision = policy.decide(PolicyContext.from_state(engine.state))
-        if decision.replan:
-            try:
-                replanned = engine.replan(planner, reason=decision.reason)
-            except NoPath:
-                engine.state.metrics.on_done(
-                    tick=engine.state.tick,
-                    world=engine.state.world,
-                    robot=engine.state.robot,
-                    reason="stalled",
-                )
-                return (
-                    RunResult(
-                        scenario_name=scenario.name,
-                        policy_name=type(policy).__name__,
-                        seed=None,
-                        ticks_executed=engine.state.tick,
-                        replans=replans + 1,
-                        moves=moves,
-                        done=True,
-                        reason="stalled",
-                        goal_reached=False,
-                        stalled=True,
-                    ),
-                    engine,
-                )
-        else:
-            replanned = False
-            engine.state.metrics.on_replan(
-                tick=engine.state.tick,
-                replanned=False,
-                found_path=bool(engine.state.robot.path),
-                world=engine.state.world,
-                robot=engine.state.robot,
-                reason=None,
-            )
-
-        if replanned:
+    if scenario.policy_name == "static_once":
+        try:
+            engine.replan(planner, reason="initial_static")
             replans += 1
 
         moved = engine.step()

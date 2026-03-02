@@ -3,6 +3,7 @@ from core.simulation.loop import RunReason, RunResult, TickResult, run_tick, run
 from core.simulation.replan_policy import (
     EventBasedReplanPolicy,
     NoReplanPolicy,
+    StaticOnceReplanPolicy,
     PathAffectedReplanPolicy,
     PolicyContext,
     PolicyDecision,
@@ -16,6 +17,7 @@ from core.simulation.state import SimulationState
 __all__ = [
     "EventBasedReplanPolicy",
     "NoReplanPolicy",
+    "StaticOnceReplanPolicy",
     "PathAffectedReplanPolicy",
     "PolicyContext",
     "PolicyDecision",

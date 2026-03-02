@@ -90,6 +90,12 @@ class EventBasedReplanPolicy:
 
 
 @dataclass(frozen=True, slots=True)
+class StaticOnceReplanPolicy:
+    def should_replan(self, state: SimulationState) -> tuple[bool, str | None]:
+        return False, None
+
+
+@dataclass(frozen=True, slots=True)
 class NoReplanPolicy:
     def decide(self, ctx: PolicyContext) -> PolicyDecision:
         del ctx
