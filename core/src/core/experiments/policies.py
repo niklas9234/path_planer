@@ -72,15 +72,19 @@ class StaticOnceReplanPolicy:
 
 @dataclass(frozen=True, slots=True)
 class PeriodicReplanPolicy:
-    interval_ticks: int = 1
+    interval: int = 1
+
+    @property
+    def interval_ticks(self) -> int:
+        return self.interval
 
     def __post_init__(self) -> None:
-        if self.interval_ticks <= 0:
-            raise ValueError("interval_ticks must be > 0.")
+        if self.interval <= 0:
+            raise ValueError("interval must be > 0.")
 
     def decide(self, context: PolicyContext) -> ReplanDecision:
-        if context.has_goal and context.tick % self.interval_ticks == 0:
-            return ReplanDecision(replan=True, reason="periodic")
+        if context.has_goal and context.dirty_replan and context.tick % self.interval == 0:
+            return ReplanDecision(replan=True, reason="periodic_dirty")
         return ReplanDecision(replan=False, reason="")
 
 

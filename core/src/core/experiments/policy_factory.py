@@ -41,7 +41,7 @@ def _make_periodic(params: dict[str, Any]) -> ReplanPolicy:
     except (TypeError, ValueError) as exc:
         raise ValueError("Invalid parameter for policy 'periodic': interval must be an integer.") from exc
     try:
-        return PeriodicReplanPolicy(interval_ticks=interval_ticks)
+        return PeriodicReplanPolicy(interval=interval_ticks)
     except ValueError as exc:
         raise ValueError(f"Invalid parameter for policy 'periodic': {exc}") from exc
 

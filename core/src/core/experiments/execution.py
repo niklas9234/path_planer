@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Mapping
 
-from core.domain import AddObstacle, AddZone, SetGoal
+from core.domain import AddObstacle, AddZone, DomainEvent, SetGoal
 
 if TYPE_CHECKING:
     from core.experiments.scenarios import ScenarioDefinition
@@ -73,6 +73,8 @@ def run_once(
         raise ValueError(f"max_ticks must be > 0, got {max_ticks}.")
 
     engine = build_engine_for_scenario(scenario)
+    resolved_policy_name = policy_name or scenario.policy_name
+
     replans = 0
     moves = 0
     resolved_policy_name = policy_name or scenario.policy_name
@@ -129,23 +131,26 @@ def run_once(
                     policy_name=resolved_policy_name,
                     seed=None,
                     ticks_executed=engine.state.tick,
-                    replans=replans,
-                    moves=moves,
+                    replans=1,
+                    moves=0,
                     done=True,
-                    reason="goal_reached",
-                    goal_reached=True,
-                    stalled=False,
+                    reason="stalled",
+                    goal_reached=False,
+                    stalled=True,
+                    run_metrics=engine.state.metrics.finalize_run_metrics(),
                 ),
                 engine,
             )
+        active_policy = NoReplanPolicy()
 
-        if not moved:
-            engine.state.metrics.on_done(
-                tick=engine.state.tick,
-                world=engine.state.world,
-                robot=engine.state.robot,
-                reason="stalled",
-            )
+    for _ in range(max_ticks):
+        _apply_scheduled_events(engine, scenario.scheduled_events)
+        tick = run_tick(engine, planner, replan_policy=active_policy)
+        if tick.replanned:
+            replans += 1
+        if tick.moved:
+            moves += 1
+        if tick.done:
             return (
                 RunResult(
                     scenario_name=scenario.name,
@@ -155,9 +160,10 @@ def run_once(
                     replans=replans,
                     moves=moves,
                     done=True,
-                    reason="stalled",
-                    goal_reached=False,
-                    stalled=True,
+                    reason=tick.reason,
+                    goal_reached=tick.reason == "goal_reached",
+                    stalled=tick.reason == "stalled",
+                    run_metrics=engine.state.metrics.finalize_run_metrics(),
                 ),
                 engine,
             )
@@ -180,6 +186,7 @@ def run_once(
             reason="max_ticks",
             goal_reached=False,
             stalled=False,
+            run_metrics=engine.state.metrics.finalize_run_metrics(),
         ),
         engine,
     )
