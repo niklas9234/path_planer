@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal
 
 from core.domain import AddObstacle, AddZone, DomainEvent, Position, ZoneType
@@ -31,7 +31,30 @@ class ScenarioDefinition:
     max_ticks: int
     scheduled_events: dict[int, tuple[DomainEvent, ...]]
     expectation: ScenarioExpectation
-    replan_mode: Literal["dynamic_event", "static_once"] = "dynamic_event"
+    policy_name: str = "event_based"
+    policy_params: dict[str, object] = field(default_factory=dict)
+    replan_mode: Literal["dynamic_event", "static_once"] | None = None
+
+    def __post_init__(self) -> None:
+        """Backwards compatible policy migration.
+
+        `replan_mode` is deprecated and only used as a fallback when `policy_name`
+        is not set. If both are provided and conflict, `policy_name` wins.
+        """
+
+        if self.replan_mode is None:
+            return
+
+        mapped_policy = _policy_name_from_replan_mode(self.replan_mode)
+        if self.policy_name:
+            return
+        object.__setattr__(self, "policy_name", mapped_policy)
+
+
+def _policy_name_from_replan_mode(replan_mode: Literal["dynamic_event", "static_once"]) -> str:
+    if replan_mode == "static_once":
+        return "static_once"
+    return "event_based"
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,6 +82,7 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
     return (
         ScenarioDefinition(
             name="empty_world_reaches_goal",
+            policy_name="event_based",
             world_config=WorldConfig(width=5, height=5),
             start=Position(0, 0),
             goal=Position(4, 4),
@@ -73,6 +97,7 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
         ),
         ScenarioDefinition(
             name="blocked_goal_stalls",
+            policy_name="event_based",
             world_config=WorldConfig(width=3, height=3),
             start=Position(0, 0),
             goal=Position(2, 2),
@@ -92,6 +117,7 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
         ),
         ScenarioDefinition(
             name="replan_after_obstacle",
+            policy_name="event_based",
             world_config=WorldConfig(width=5, height=3),
             start=Position(0, 0),
             goal=Position(4, 0),
@@ -106,6 +132,7 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
         ),
         ScenarioDefinition(
             name="temporary_slow_zone_expires",
+            policy_name="event_based",
             world_config=WorldConfig(width=6, height=3),
             start=Position(0, 1),
             goal=Position(5, 1),
@@ -129,6 +156,7 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
         ),
         ScenarioDefinition(
             name="max_ticks_guard",
+            policy_name="event_based",
             world_config=WorldConfig(width=5, height=5),
             start=Position(0, 0),
             goal=Position(4, 4),
@@ -142,6 +170,7 @@ def required_scenarios() -> tuple[ScenarioDefinition, ...]:
         ),
         ScenarioDefinition(
             name="testpath_20x20_image_map",
+            policy_name="event_based",
             world_config=WorldConfig(width=20, height=20),
             start=Position(3, 19),
             goal=Position(12, 0),

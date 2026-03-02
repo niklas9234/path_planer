@@ -50,9 +50,7 @@ def execute_scenario(
     *,
     max_ticks: int,
 ) -> tuple[RunResult, SimulationEngine]:
-    replan_policy: ReplanPolicy = EventBasedReplanPolicy()
-    if scenario.replan_mode == "static_once":
-        replan_policy = NoReplanPolicy()
+    replan_policy = _policy_from_scenario(scenario)
 
     return run_once(
         scenario,
@@ -61,6 +59,20 @@ def execute_scenario(
         max_ticks=max_ticks,
     )
 
+
+
+
+def _policy_from_scenario(scenario: ScenarioDefinition) -> ReplanPolicy:
+    policy_name = scenario.policy_name
+    if scenario.replan_mode is not None and not policy_name:
+        policy_name = "static_once" if scenario.replan_mode == "static_once" else "event_based"
+
+    if policy_name == "static_once":
+        return NoReplanPolicy()
+    if policy_name == "event_based":
+        return EventBasedReplanPolicy()
+
+    raise ValueError(f"Unsupported policy_name '{scenario.policy_name}' for scenario '{scenario.name}'.")
 
 def run_once(
     scenario: ScenarioDefinition,
@@ -75,7 +87,7 @@ def run_once(
     replans = 0
     moves = 0
 
-    if scenario.replan_mode == "static_once":
+    if scenario.policy_name == "static_once":
         try:
             engine.replan(planner, reason="initial_static")
             replans += 1
