@@ -15,14 +15,25 @@ from core.simulation.loop import RunResult
 def build_engine_for_scenario(scenario: ScenarioDefinition) -> SimulationEngine:
     engine = SimulationEngine(
         SimulationState.create(
-            width=scenario.width,
-            height=scenario.height,
+            width=scenario.world_config.width,
+            height=scenario.world_config.height,
             robot_position=scenario.start,
+            cell_size_m=scenario.world_config.cell_size_m,
+            base_cost=scenario.world_config.base_cost,
         ),
     )
     engine.apply(SetGoal(goal=scenario.goal))
     for obstacle in scenario.initial_obstacles:
         engine.apply(AddObstacle(position=obstacle))
+    for zone in scenario.initial_zones:
+        engine.apply(
+            AddZone(
+                zone_type=zone.zone_type,
+                cells=zone.cells,
+                duration_ticks=zone.duration_ticks,
+                extra_cost=zone.extra_cost,
+            ),
+        )
     return engine
 
 
@@ -58,17 +69,8 @@ def execute_scenario(
         replan_policy = NoReplanPolicy()
 
     for _ in range(max_ticks):
-        for obstacle in scenario.dynamic_obstacles_by_tick.get(engine.state.tick, ()):
-            engine.apply(AddObstacle(position=obstacle))
-        for zone_type, cells, duration_ticks, extra_cost in scenario.dynamic_zones_by_tick.get(engine.state.tick, ()):
-            engine.apply(
-                AddZone(
-                    zone_type=zone_type,
-                    cells=cells,
-                    duration_ticks=duration_ticks,
-                    extra_cost=extra_cost,
-                ),
-            )
+        for event in scenario.scheduled_events.get(engine.state.tick, ()):
+            engine.apply(event)
 
         tick = run_tick(engine, planner, replan_policy=replan_policy)
         if tick.replanned:
