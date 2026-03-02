@@ -9,14 +9,11 @@ if TYPE_CHECKING:
 from core.planning import Planner
 from core.planning.astar import NoPath
 from core.simulation import (
-    EventBasedReplanPolicy,
-    NoReplanPolicy,
-    PathAffectedReplanPolicy,
-    PeriodicReplanPolicy,
+    PolicyContext,
     ReplanPolicy,
     SimulationEngine,
     SimulationState,
-    run_tick,
+    make_policy,
 )
 from core.simulation.loop import RunResult
 
@@ -100,34 +97,19 @@ def run_once(
         try:
             engine.replan(planner, reason="initial_static")
             replans += 1
-        except NoPath:
-            return (
-                RunResult(
-                    scenario_name=scenario.name,
-                    policy_name=resolved_policy_name,
-                    seed=None,
-                    ticks_executed=engine.state.tick,
-                    replans=1,
-                    moves=0,
-                    done=True,
-                    reason="stalled",
-                    goal_reached=False,
-                    stalled=True,
-                ),
-                engine,
-            )
 
-    for _ in range(max_ticks):
-        for event in scenario.scheduled_events.get(engine.state.tick, ()):
-            engine.apply(event)
-
-        tick = run_tick(engine, planner, replan_policy=policy)
-        if tick.replanned:
-            replans += 1
-        if tick.moved:
+        moved = engine.step()
+        if moved:
             moves += 1
 
-        if tick.done:
+        at_goal = engine.state.robot.at_goal()
+        if at_goal:
+            engine.state.metrics.on_done(
+                tick=engine.state.tick,
+                world=engine.state.world,
+                robot=engine.state.robot,
+                reason="goal_reached",
+            )
             return (
                 RunResult(
                     scenario_name=scenario.name,
@@ -137,9 +119,32 @@ def run_once(
                     replans=replans,
                     moves=moves,
                     done=True,
-                    reason=tick.reason,
-                    goal_reached=tick.reason == "goal_reached",
-                    stalled=tick.reason == "stalled",
+                    reason="goal_reached",
+                    goal_reached=True,
+                    stalled=False,
+                ),
+                engine,
+            )
+
+        if not moved:
+            engine.state.metrics.on_done(
+                tick=engine.state.tick,
+                world=engine.state.world,
+                robot=engine.state.robot,
+                reason="stalled",
+            )
+            return (
+                RunResult(
+                    scenario_name=scenario.name,
+                    policy_name=resolved_policy_name,
+                    seed=None,
+                    ticks_executed=engine.state.tick,
+                    replans=replans,
+                    moves=moves,
+                    done=True,
+                    reason="stalled",
+                    goal_reached=False,
+                    stalled=True,
                 ),
                 engine,
             )

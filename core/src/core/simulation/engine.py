@@ -212,6 +212,15 @@ class SimulationEngine:
             )
             return False
 
+        if self.state.world.is_blocked(waypoint):
+            self.state.metrics.on_step_executed(
+                tick=self.state.tick,
+                moved=False,
+                world=self.state.world,
+                robot=self.state.robot,
+            )
+            return False
+
         step_cost = self.state.world.get_cell_cost(waypoint)
         self.state.robot.set_position(waypoint, clear_plan=False)
         self.state.robot.advance_waypoint()

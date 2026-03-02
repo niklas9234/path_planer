@@ -49,6 +49,25 @@ def test_replan_after_obstacle() -> None:
     assert result.reason in {"goal_reached", "stalled"}
 
 
+def test_static_once_includes_initial_replan() -> None:
+    scenario = ScenarioDefinition(
+        name="static_once_initial_replan",
+        world_config=WorldConfig(width=5, height=3),
+        start=Position(0, 0),
+        goal=Position(4, 0),
+        initial_obstacles=(),
+        initial_zones=(),
+        max_ticks=20,
+        scheduled_events={},
+        expectation=ScenarioExpectation(allowed_reasons=("goal_reached", "stalled")),
+        replan_mode="static_once",
+    )
+
+    result = run_scenario(scenario)
+
+    assert result.replans == 1
+
+
 def test_max_ticks_guard() -> None:
     scenario = _scenario_by_name("max_ticks_guard")
 
