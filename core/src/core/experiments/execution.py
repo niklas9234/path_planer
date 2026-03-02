@@ -8,14 +8,9 @@ if TYPE_CHECKING:
     from core.experiments.scenarios import ScenarioDefinition
 from core.planning import Planner
 from core.planning.astar import NoPath
-from core.simulation import (
-    PolicyContext,
-    ReplanPolicy,
-    SimulationEngine,
-    SimulationState,
-    make_policy,
-)
-from core.simulation.loop import RunResult
+from core.simulation import ReplanPolicy, SimulationEngine, SimulationState
+from core.simulation.replan_policy import make_policy
+from core.simulation.loop import RunResult, run_until_done
 
 
 def build_engine_for_scenario(scenario: ScenarioDefinition) -> SimulationEngine:
@@ -53,7 +48,7 @@ def execute_scenario(
 ) -> tuple[RunResult, SimulationEngine]:
     effective_policy_name = policy_name or scenario.policy_name
     effective_policy_params = {**scenario.policy_params, **(dict(policy_params or {}))}
-    replan_policy = _policy_from_name(effective_policy_name, effective_policy_params)
+    replan_policy = make_policy(effective_policy_name, dict(effective_policy_params))
 
     return run_once(
         scenario,
@@ -61,21 +56,8 @@ def execute_scenario(
         planner=planner,
         max_ticks=max_ticks,
         policy_name=effective_policy_name,
+        policy_params=effective_policy_params,
     )
-
-def _policy_from_name(policy_name: str, policy_params: Mapping[str, object]) -> ReplanPolicy:
-    if policy_name == "static_once":
-        return NoReplanPolicy()
-    if policy_name == "event_based":
-        return EventBasedReplanPolicy()
-    if policy_name == "periodic":
-        interval = int(policy_params.get("interval", 1))
-        return PeriodicReplanPolicy(interval_ticks=interval)
-    if policy_name == "path_affected":
-        threshold = float(policy_params.get("cost_delta_threshold", 0.0))
-        return PathAffectedReplanPolicy(cost_delta_threshold=threshold)
-
-    raise ValueError(f"Unsupported policy_name '{policy_name}'.")
 
 def run_once(
     scenario: ScenarioDefinition,
@@ -83,6 +65,7 @@ def run_once(
     planner: Planner,
     max_ticks: int,
     policy_name: str | None = None,
+    policy_params: Mapping[str, object] | None = None,
 ) -> tuple[RunResult, SimulationEngine]:
     if max_ticks <= 0:
         raise ValueError(f"max_ticks must be > 0, got {max_ticks}.")
@@ -92,11 +75,35 @@ def run_once(
     moves = 0
 
     resolved_policy_name = policy_name or scenario.policy_name
+    resolved_policy_params = dict(policy_params or scenario.policy_params)
 
     if resolved_policy_name == "static_once":
         try:
             engine.replan(planner, reason="initial_static")
             replans += 1
+        except NoPath:
+            engine.state.metrics.on_done(
+                tick=engine.state.tick,
+                world=engine.state.world,
+                robot=engine.state.robot,
+                reason="stalled",
+            )
+            return (
+                RunResult(
+                    scenario_name=scenario.name,
+                    policy_name=resolved_policy_name,
+                    policy_params=resolved_policy_params,
+                    seed=None,
+                    ticks_executed=engine.state.tick,
+                    replans=replans,
+                    moves=moves,
+                    done=True,
+                    reason="stalled",
+                    goal_reached=False,
+                    stalled=True,
+                ),
+                engine,
+            )
 
         moved = engine.step()
         if moved:
@@ -114,6 +121,7 @@ def run_once(
                 RunResult(
                     scenario_name=scenario.name,
                     policy_name=resolved_policy_name,
+                    policy_params=resolved_policy_params,
                     seed=None,
                     ticks_executed=engine.state.tick,
                     replans=replans,
@@ -137,6 +145,7 @@ def run_once(
                 RunResult(
                     scenario_name=scenario.name,
                     policy_name=resolved_policy_name,
+                    policy_params=resolved_policy_params,
                     seed=None,
                     ticks_executed=engine.state.tick,
                     replans=replans,
@@ -150,17 +159,15 @@ def run_once(
             )
 
     return (
-        RunResult(
+        run_until_done(
+            engine,
+            planner,
+            max_ticks=max_ticks,
+            replan_policy=policy,
             scenario_name=scenario.name,
             policy_name=resolved_policy_name,
+            policy_params=resolved_policy_params,
             seed=None,
-            ticks_executed=engine.state.tick,
-            replans=replans,
-            moves=moves,
-            done=False,
-            reason="max_ticks",
-            goal_reached=False,
-            stalled=False,
         ),
         engine,
     )

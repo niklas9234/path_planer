@@ -34,3 +34,13 @@ def test_run_context_available_in_metrics_and_exports() -> None:
     assert payload["metrics"]["run_id"] == result.run_context.run_id
     assert payload["snapshots"][0]["meta"]["run_id"] == result.run_context.run_id
     assert payload["snapshots"][0]["meta"]["tick"] == result.run_result.ticks_executed
+
+
+def test_run_experiment_export_contains_policy_metadata() -> None:
+    scenario = _scenario_by_name("empty_world_reaches_goal")
+
+    result = run_experiment(scenario)
+    payload = result.to_export_dict()
+
+    assert payload["run_result"]["policy_name"] == scenario.policy_name
+    assert payload["run_result"]["policy_params"] == dict(scenario.policy_params)

@@ -26,6 +26,7 @@ class CliRunSummary:
     scenario: str
     planner: str
     policy_name: str
+    policy_params: dict[str, object]
     ticks_executed: int
     replans: int
     moves: int
@@ -109,6 +110,7 @@ def run_scenario_experiment(
         scenario=scenario.name,
         planner=planner,
         policy_name=run_result.policy_name or effective_policy_name,
+        policy_params=dict(run_result.policy_params or effective_policy_params),
         ticks_executed=run_result.ticks_executed,
         replans=run_result.replans,
         moves=run_result.moves,

@@ -25,6 +25,7 @@ class TickResult:
 class RunResult:
     scenario_name: str | None
     policy_name: str | None
+    policy_params: dict[str, int | float | bool | str | None] | None
     seed: int | None
     ticks_executed: int
     replans: int
@@ -119,6 +120,7 @@ def run_until_done(
     replan_policy: ReplanPolicy | None = None,
     scenario_name: str | None = None,
     policy_name: str | None = None,
+    policy_params: dict[str, int | float | bool | str | None] | None = None,
     seed: int | None = None,
 ) -> RunResult:
     if max_ticks <= 0:
@@ -138,6 +140,7 @@ def run_until_done(
             return RunResult(
                 scenario_name=scenario_name,
                 policy_name=policy_name or type(replan_policy or EventBasedReplanPolicy()).__name__,
+                policy_params=policy_params,
                 seed=seed,
                 ticks_executed=engine.state.tick,
                 replans=replans,
@@ -158,6 +161,7 @@ def run_until_done(
     return RunResult(
         scenario_name=scenario_name,
         policy_name=policy_name or type(replan_policy or EventBasedReplanPolicy()).__name__,
+        policy_params=policy_params,
         seed=seed,
         ticks_executed=engine.state.tick,
         replans=replans,

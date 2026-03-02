@@ -86,7 +86,7 @@ def test_cli_optionally_emits_ticks_and_snapshot(tmp_path) -> None:
 def test_cli_accepts_policy_overrides_and_emits_policy_name(tmp_path) -> None:
     metrics_path = tmp_path / "metrics.json"
 
-    subprocess.run(
+    completed = subprocess.run(
         [
             sys.executable,
             "-m",
@@ -113,3 +113,5 @@ def test_cli_accepts_policy_overrides_and_emits_policy_name(tmp_path) -> None:
 
     payload = json.loads(metrics_path.read_text(encoding="utf-8"))
     assert payload["summary"]["policy_name"] == "periodic"
+    assert payload["summary"]["policy_params"] == {"interval": 5}
+    assert "Policy=periodic (interval=5)" in completed.stdout
