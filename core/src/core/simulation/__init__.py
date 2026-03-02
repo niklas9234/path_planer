@@ -5,8 +5,12 @@ from core.simulation.replan_policy import (
     NoReplanPolicy,
     StaticOnceReplanPolicy,
     PathAffectedReplanPolicy,
+    PolicyContext,
+    PolicyDecision,
     PeriodicReplanPolicy,
     ReplanPolicy,
+    StaticOnceReplanPolicy,
+    make_policy,
 )
 from core.simulation.state import SimulationState
 
@@ -15,8 +19,11 @@ __all__ = [
     "NoReplanPolicy",
     "StaticOnceReplanPolicy",
     "PathAffectedReplanPolicy",
+    "PolicyContext",
+    "PolicyDecision",
     "PeriodicReplanPolicy",
     "ReplanPolicy",
+    "StaticOnceReplanPolicy",
     "RunReason",
     "RunResult",
     "SimulationEngine",
@@ -24,4 +31,5 @@ __all__ = [
     "TickResult",
     "run_tick",
     "run_until_done",
+    "make_policy",
 ]
