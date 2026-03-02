@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from core.experiments import required_scenarios, run_scenario
+from core.domain import Position
+from core.experiments import ScenarioDefinition, ScenarioExpectation, required_scenarios, run_scenario
 
 
 def _scenario_by_name(name: str):
@@ -50,3 +51,38 @@ def test_temporary_slow_zone_expires() -> None:
 
     assert result.reason == "goal_reached"
     assert result.replans >= 1
+
+
+def test_replan_mode_static_once_vs_dynamic_event() -> None:
+    base_kwargs = dict(
+        width=5,
+        height=3,
+        start=Position(0, 0),
+        goal=Position(4, 0),
+        initial_obstacles=(),
+        max_ticks=20,
+        dynamic_obstacles_by_tick={1: (Position(2, 0),)},
+        dynamic_zones_by_tick={},
+        expectation=ScenarioExpectation(allowed_reasons=("goal_reached", "stalled")),
+    )
+    dynamic_scenario = ScenarioDefinition(
+        name="pair_dynamic_event",
+        replan_mode="dynamic_event",
+        **base_kwargs,
+    )
+    static_scenario = ScenarioDefinition(
+        name="pair_static_once",
+        replan_mode="static_once",
+        **base_kwargs,
+    )
+
+    dynamic_result = run_scenario(dynamic_scenario)
+    static_result = run_scenario(static_scenario)
+
+    assert dynamic_result.replans != static_result.replans
+
+    dynamic_result_repeat = run_scenario(dynamic_scenario)
+    static_result_repeat = run_scenario(static_scenario)
+
+    assert dynamic_result == dynamic_result_repeat
+    assert static_result == static_result_repeat

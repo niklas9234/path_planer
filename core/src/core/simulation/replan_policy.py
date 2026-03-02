@@ -37,6 +37,16 @@ class EventBasedReplanPolicy:
 
 
 @dataclass(frozen=True, slots=True)
+class NoReplanPolicy:
+    def should_replan(self, state: SimulationState) -> tuple[bool, str | None]:
+        if state.dirty_replan:
+            state.robot.clear_plan()
+            state.dirty_replan = False
+            state.replan_events.clear()
+        return False, None
+
+
+@dataclass(frozen=True, slots=True)
 class PathAffectedReplanPolicy:
     cost_delta_threshold: float = 0.0
 
