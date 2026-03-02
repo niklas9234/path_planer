@@ -2,19 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Mapping
 
-from core.domain import AddObstacle, AddZone, SetGoal
+from core.domain import AddObstacle, AddZone, DomainEvent, SetGoal
 
 if TYPE_CHECKING:
     from core.experiments.scenarios import ScenarioDefinition
 from core.planning import Planner
 from core.planning.astar import NoPath
-from core.simulation import (
-    PolicyContext,
-    ReplanPolicy,
-    SimulationEngine,
-    SimulationState,
-    make_policy,
-)
+from core.simulation import ReplanPolicy, SimulationEngine, SimulationState, make_policy
 from core.simulation.loop import RunResult
 
 
@@ -63,19 +57,10 @@ def execute_scenario(
         policy_name=effective_policy_name,
     )
 
-def _policy_from_name(policy_name: str, policy_params: Mapping[str, object]) -> ReplanPolicy:
-    if policy_name == "static_once":
-        return NoReplanPolicy()
-    if policy_name == "event_based":
-        return EventBasedReplanPolicy()
-    if policy_name == "periodic":
-        interval = int(policy_params.get("interval", 1))
-        return PeriodicReplanPolicy(interval_ticks=interval)
-    if policy_name == "path_affected":
-        threshold = float(policy_params.get("cost_delta_threshold", 0.0))
-        return PathAffectedReplanPolicy(cost_delta_threshold=threshold)
 
-    raise ValueError(f"Unsupported policy_name '{policy_name}'.")
+def _policy_from_name(policy_name: str, policy_params: Mapping[str, object]) -> ReplanPolicy:
+    return make_policy(policy_name, policy_params)
+
 
 def run_once(
     scenario: ScenarioDefinition,
@@ -88,22 +73,52 @@ def run_once(
         raise ValueError(f"max_ticks must be > 0, got {max_ticks}.")
 
     engine = build_engine_for_scenario(scenario)
-    replans = 0
-    moves = 0
-
     resolved_policy_name = policy_name or scenario.policy_name
 
-    if resolved_policy_name == "static_once":
-        try:
-            engine.replan(planner, reason="initial_static")
-            replans += 1
+    replans = 0
+    moves = 0
+    resolved_policy_name = policy_name or scenario.policy_name
+
+    for _ in range(max_ticks):
+        if events := scenario.scheduled_events.get(engine.state.tick, ()):
+            for event in events:
+                engine.apply(event)
+
+        engine.process_tick_updates()
+        should_replan, replan_reason = policy.should_replan(engine.state)
+
+        if should_replan:
+            try:
+                engine.replan(planner, reason=replan_reason)
+                replans += 1
+            except NoPath:
+                engine.state.metrics.on_done(
+                    tick=engine.state.tick,
+                    world=engine.state.world,
+                    robot=engine.state.robot,
+                    reason="stalled",
+                )
+                return (
+                    RunResult(
+                        scenario_name=scenario.name,
+                        policy_name=resolved_policy_name,
+                        seed=None,
+                        ticks_executed=engine.state.tick,
+                        replans=replans,
+                        moves=moves,
+                        done=True,
+                        reason="stalled",
+                        goal_reached=False,
+                        stalled=True,
+                    ),
+                    engine,
+                )
 
         moved = engine.step()
         if moved:
             moves += 1
 
-        at_goal = engine.state.robot.at_goal()
-        if at_goal:
+        if engine.state.robot.at_goal():
             engine.state.metrics.on_done(
                 tick=engine.state.tick,
                 world=engine.state.world,
@@ -116,23 +131,26 @@ def run_once(
                     policy_name=resolved_policy_name,
                     seed=None,
                     ticks_executed=engine.state.tick,
-                    replans=replans,
-                    moves=moves,
+                    replans=1,
+                    moves=0,
                     done=True,
-                    reason="goal_reached",
-                    goal_reached=True,
-                    stalled=False,
+                    reason="stalled",
+                    goal_reached=False,
+                    stalled=True,
+                    run_metrics=engine.state.metrics.finalize_run_metrics(),
                 ),
                 engine,
             )
+        active_policy = NoReplanPolicy()
 
-        if not moved:
-            engine.state.metrics.on_done(
-                tick=engine.state.tick,
-                world=engine.state.world,
-                robot=engine.state.robot,
-                reason="stalled",
-            )
+    for _ in range(max_ticks):
+        _apply_scheduled_events(engine, scenario.scheduled_events)
+        tick = run_tick(engine, planner, replan_policy=active_policy)
+        if tick.replanned:
+            replans += 1
+        if tick.moved:
+            moves += 1
+        if tick.done:
             return (
                 RunResult(
                     scenario_name=scenario.name,
@@ -142,13 +160,20 @@ def run_once(
                     replans=replans,
                     moves=moves,
                     done=True,
-                    reason="stalled",
-                    goal_reached=False,
-                    stalled=True,
+                    reason=tick.reason,
+                    goal_reached=tick.reason == "goal_reached",
+                    stalled=tick.reason == "stalled",
+                    run_metrics=engine.state.metrics.finalize_run_metrics(),
                 ),
                 engine,
             )
 
+    engine.state.metrics.on_done(
+        tick=engine.state.tick,
+        world=engine.state.world,
+        robot=engine.state.robot,
+        reason="max_ticks",
+    )
     return (
         RunResult(
             scenario_name=scenario.name,
@@ -161,6 +186,7 @@ def run_once(
             reason="max_ticks",
             goal_reached=False,
             stalled=False,
+            run_metrics=engine.state.metrics.finalize_run_metrics(),
         ),
         engine,
     )
