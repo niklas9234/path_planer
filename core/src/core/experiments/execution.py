@@ -8,7 +8,14 @@ if TYPE_CHECKING:
     from core.experiments.scenarios import ScenarioDefinition
 from core.planning import Planner
 from core.planning.astar import NoPath
-from core.simulation import EventBasedReplanPolicy, NoReplanPolicy, SimulationEngine, SimulationState, run_tick
+from core.simulation import (
+    EventBasedReplanPolicy,
+    NoReplanPolicy,
+    ReplanPolicy,
+    SimulationEngine,
+    SimulationState,
+    run_tick,
+)
 from core.simulation.loop import RunResult
 
 
@@ -43,6 +50,24 @@ def execute_scenario(
     *,
     max_ticks: int,
 ) -> tuple[RunResult, SimulationEngine]:
+    replan_policy: ReplanPolicy = EventBasedReplanPolicy()
+    if scenario.replan_mode == "static_once":
+        replan_policy = NoReplanPolicy()
+
+    return run_once(
+        scenario,
+        policy=replan_policy,
+        planner=planner,
+        max_ticks=max_ticks,
+    )
+
+
+def run_once(
+    scenario: ScenarioDefinition,
+    policy: ReplanPolicy,
+    planner: Planner,
+    max_ticks: int,
+) -> tuple[RunResult, SimulationEngine]:
     if max_ticks <= 0:
         raise ValueError(f"max_ticks must be > 0, got {max_ticks}.")
 
@@ -50,7 +75,6 @@ def execute_scenario(
     replans = 0
     moves = 0
 
-    replan_policy = EventBasedReplanPolicy()
     if scenario.replan_mode == "static_once":
         try:
             engine.replan(planner, reason="initial_static")
@@ -66,13 +90,12 @@ def execute_scenario(
                 ),
                 engine,
             )
-        replan_policy = NoReplanPolicy()
 
     for _ in range(max_ticks):
         for event in scenario.scheduled_events.get(engine.state.tick, ()):
             engine.apply(event)
 
-        tick = run_tick(engine, planner, replan_policy=replan_policy)
+        tick = run_tick(engine, planner, replan_policy=policy)
         if tick.replanned:
             replans += 1
         if tick.moved:
