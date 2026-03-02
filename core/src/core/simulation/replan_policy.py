@@ -57,17 +57,23 @@ class ReplanPolicy(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class PeriodicReplanPolicy:
-    interval_ticks: int = 1
+    interval: int = 1
+
+    @property
+    def interval_ticks(self) -> int:
+        return self.interval
 
     def __post_init__(self) -> None:
-        if self.interval_ticks <= 0:
-            raise ValueError("interval_ticks must be > 0.")
+        if self.interval <= 0:
+            raise ValueError("interval must be > 0.")
 
     def decide(self, ctx: PolicyContext) -> PolicyDecision:
         if not ctx.has_goal:
             return PolicyDecision(replan=False)
-        if ctx.tick % self.interval_ticks == 0:
-            return PolicyDecision(replan=True, reason="periodic")
+        if not ctx.dirty_replan:
+            return PolicyDecision(replan=False)
+        if ctx.tick % self.interval == 0:
+            return PolicyDecision(replan=True, reason="periodic_dirty")
         return PolicyDecision(replan=False)
 
     def should_replan(self, state: SimulationState) -> tuple[bool, str | None]:
@@ -167,8 +173,8 @@ def make_policy(policy_name: str, policy_params: Mapping[str, Any] | None = None
     if normalized in {"static_once", "static"}:
         return StaticOnceReplanPolicy()
     if normalized in {"periodic", "periodic_replan"}:
-        interval_ticks = int(params.get("interval_ticks", 1))
-        return PeriodicReplanPolicy(interval_ticks=interval_ticks)
+        interval = int(params.get("interval", params.get("interval_ticks", 1)))
+        return PeriodicReplanPolicy(interval=interval)
     if normalized in {"path_affected", "pathaffected"}:
         threshold = float(params.get("cost_delta_threshold", 0.0))
         return PathAffectedReplanPolicy(cost_delta_threshold=threshold)

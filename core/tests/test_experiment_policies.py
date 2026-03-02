@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pytest
 from core.domain import Position
 from core.experiments.policies import (
     EventBasedReplanPolicy,
@@ -46,15 +47,34 @@ def test_static_once_replan_policy_replans_only_once() -> None:
     assert second.replan is False
 
 
-def test_periodic_replan_policy_respects_interval() -> None:
-    policy = PeriodicReplanPolicy(interval_ticks=3)
+def test_periodic_replan_policy_no_replan_when_tick_not_multiple() -> None:
+    policy = PeriodicReplanPolicy(interval=3)
 
-    replan_tick = policy.decide(make_context(tick=6))
-    no_replan_tick = policy.decide(make_context(tick=7))
+    decision = policy.decide(make_context(tick=7, dirty_replan=True))
 
-    assert replan_tick.replan is True
-    assert replan_tick.reason == "periodic"
-    assert no_replan_tick.replan is False
+    assert decision.replan is False
+
+
+def test_periodic_replan_policy_replans_for_multiple_dirty_goal() -> None:
+    policy = PeriodicReplanPolicy(interval=3)
+
+    decision = policy.decide(make_context(tick=6, dirty_replan=True, has_goal=True))
+
+    assert decision.replan is True
+    assert decision.reason == "periodic_dirty"
+
+
+def test_periodic_replan_policy_no_replan_when_not_dirty() -> None:
+    policy = PeriodicReplanPolicy(interval=3)
+
+    decision = policy.decide(make_context(tick=6, dirty_replan=False, has_goal=True))
+
+    assert decision.replan is False
+
+
+def test_periodic_replan_policy_invalid_interval_raises_controlled_error() -> None:
+    with pytest.raises(ValueError, match="interval must be > 0"):
+        PeriodicReplanPolicy(interval=0)
 
 
 def test_path_affected_replan_policy_detects_changed_remaining_path_cells() -> None:

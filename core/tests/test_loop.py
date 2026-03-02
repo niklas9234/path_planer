@@ -43,8 +43,8 @@ def test_periodic_policy_replans_every_two_ticks() -> None:
     engine = _make_engine()
     engine.apply(SetGoal(goal=Position(4, 4)))
 
-    t1 = run_tick(engine, plan, replan_policy=PeriodicReplanPolicy(interval_ticks=2))
-    t2 = run_tick(engine, plan, replan_policy=PeriodicReplanPolicy(interval_ticks=2))
+    t1 = run_tick(engine, plan, replan_policy=PeriodicReplanPolicy(interval=2))
+    t2 = run_tick(engine, plan, replan_policy=PeriodicReplanPolicy(interval=2))
 
     assert t1.replanned is True
     assert t2.replanned is False
