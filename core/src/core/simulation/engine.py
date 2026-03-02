@@ -33,7 +33,7 @@ class SimulationEngine:
             self.state.metrics = MetricsRecorder()
 
     def apply(self, event: DomainEvent) -> None:
-        self.state.metrics.record_apply_event(tick=self.state.tick, event=event)
+        self.state.metrics.on_event_applied(tick=self.state.tick, event=event)
         if isinstance(event, InitWorld):
             self._apply_init_world(event)
             self.state.world_delta.world_reinitialized = True
@@ -94,12 +94,6 @@ class SimulationEngine:
                 self.state.world_delta.obstacle_cells_changed.update(event.cells)
             else:
                 self.state.world_delta.cost_cells_changed.update(event.cells)
-            self.state.metrics.record_zone_added(
-                tick=self.state.tick,
-                zone_type=event.zone_type,
-                cells=len(event.cells),
-                duration_ticks=event.duration_ticks,
-            )
             self.state.dirty_replan = self.state.robot.goal is not None
             self.state.replan_events.add("zone_changed")
             return
@@ -112,25 +106,23 @@ class SimulationEngine:
             return
         raise TypeError(f"Unsupported event type: {type(event)!r}")
 
-    def process_tick_updates(self) -> None:
+    def process_tick_updates(self) -> tuple[int, int]:
         changes = self.state.world.expire_zones(self.state.tick)
         if changes.obstacle_cells_changed:
             self.state.world_delta.obstacle_cells_changed.update(changes.obstacle_cells_changed)
         if changes.cost_cells_changed:
             self.state.world_delta.cost_cells_changed.update(changes.cost_cells_changed)
 
-        if changes.obstacle_cells_changed or changes.cost_cells_changed:
-            self.state.metrics.record_zone_expiration(
-                tick=self.state.tick,
-                obstacle_cells=len(changes.obstacle_cells_changed),
-                cost_cells=len(changes.cost_cells_changed),
-            )
+        obstacle_count = len(changes.obstacle_cells_changed)
+        cost_count = len(changes.cost_cells_changed)
+        if obstacle_count or cost_count:
             self.state.dirty_replan = self.state.robot.goal is not None
             self.state.replan_events.add("zone_expired")
+        return obstacle_count, cost_count
 
     def replan(self, planner: PlannerFn, *, reason: str | None = None) -> bool:
         if not self.state.dirty_replan and reason != "periodic":
-            self.state.metrics.record_replan_result(
+            self.state.metrics.on_replan(
                 tick=self.state.tick,
                 replanned=False,
                 found_path=bool(self.state.robot.path),
@@ -145,7 +137,7 @@ class SimulationEngine:
             self.state.robot.clear_plan()
             self.state.dirty_replan = False
             self._clear_world_delta()
-            self.state.metrics.record_replan_result(
+            self.state.metrics.on_replan(
                 tick=self.state.tick,
                 replanned=False,
                 found_path=False,
@@ -158,7 +150,7 @@ class SimulationEngine:
         try:
             result = planner(self.state.world, self.state.robot.position, goal)
         except NoPath:
-            self.state.metrics.record_replan_result(
+            self.state.metrics.on_replan(
                 tick=self.state.tick,
                 replanned=True,
                 found_path=False,
@@ -169,7 +161,7 @@ class SimulationEngine:
             raise
 
         if not result.path:
-            self.state.metrics.record_replan_result(
+            self.state.metrics.on_replan(
                 tick=self.state.tick,
                 replanned=True,
                 found_path=False,
@@ -184,7 +176,7 @@ class SimulationEngine:
         self.state.dirty_replan = False
         self._clear_world_delta()
         self.state.replan_events.clear()
-        self.state.metrics.record_replan_result(
+        self.state.metrics.on_replan(
             tick=self.state.tick,
             replanned=True,
             found_path=bool(result.path),
@@ -196,7 +188,7 @@ class SimulationEngine:
 
     def replan_if_needed(self, planner: PlannerFn) -> bool:
         if not self.state.dirty_replan:
-            self.state.metrics.record_replan_result(
+            self.state.metrics.on_replan(
                 tick=self.state.tick,
                 replanned=False,
                 found_path=bool(self.state.robot.path),
@@ -212,7 +204,7 @@ class SimulationEngine:
 
         waypoint = self.state.robot.next_waypoint()
         if waypoint is None:
-            self.state.metrics.record_step(
+            self.state.metrics.on_step_executed(
                 tick=self.state.tick,
                 moved=False,
                 world=self.state.world,
@@ -223,7 +215,7 @@ class SimulationEngine:
         step_cost = self.state.world.get_cell_cost(waypoint)
         self.state.robot.set_position(waypoint, clear_plan=False)
         self.state.robot.advance_waypoint()
-        self.state.metrics.record_step(
+        self.state.metrics.on_step_executed(
             tick=self.state.tick,
             moved=True,
             world=self.state.world,

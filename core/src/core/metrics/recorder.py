@@ -52,14 +52,35 @@ class MetricsRecorder:
         return robot.path[robot.path_index :]
 
     def _path_cost(self, world: World, robot: RobotState) -> float:
-        return sum(world.get_cell_cost(pos) for pos in self._remaining_path(robot))
+        cost = 0.0
+        for pos in self._remaining_path(robot):
+            try:
+                cost += world.get_cell_cost(pos)
+            except ValueError:
+                continue
+        return cost
 
     def _update_path_metrics(self, tick: TickMetrics, world: World, robot: RobotState) -> None:
         remaining = self._remaining_path(robot)
         tick.path_length_current = len(remaining)
         tick.path_cost_current = self._path_cost(world, robot)
 
-    def record_apply_event(self, *, tick: int, event: DomainEvent) -> None:
+    def on_tick_start(
+        self,
+        *,
+        tick: int,
+        world: World,
+        robot: RobotState,
+        zone_expired_obstacle_cells: int = 0,
+        zone_expired_cost_cells: int = 0,
+    ) -> None:
+        current = self._current_tick(tick)
+        if zone_expired_obstacle_cells or zone_expired_cost_cells:
+            self.zone_expirations_total += 1
+            current.zone_expirations = self.zone_expirations_total
+        self._update_path_metrics(current, world, robot)
+
+    def on_event_applied(self, *, tick: int, event: DomainEvent) -> None:
         current = self._current_tick(tick)
 
         if isinstance(event, SetGoal):
@@ -80,7 +101,7 @@ class MetricsRecorder:
             self.last_replan_trigger_reason = "event"
             current.replan_trigger_reason = self.last_replan_trigger_reason
 
-    def record_replan_result(
+    def on_replan(
         self,
         *,
         tick: int,
@@ -103,7 +124,7 @@ class MetricsRecorder:
             current.replan_count = 0
         self._update_path_metrics(current, world, robot)
 
-    def record_step(
+    def on_step_executed(
         self,
         *,
         tick: int,
@@ -121,6 +142,60 @@ class MetricsRecorder:
         if current.goal_reached and current.ticks_to_goal is None:
             current.ticks_to_goal = tick
         self._update_path_metrics(current, world, robot)
+
+    def on_done(
+        self,
+        *,
+        tick: int,
+        world: World,
+        robot: RobotState,
+        reason: str,
+    ) -> None:
+        del reason
+        current = self._current_tick(tick)
+        current.goal_reached = robot.at_goal()
+        if current.goal_reached and current.ticks_to_goal is None:
+            current.ticks_to_goal = tick
+        self._update_path_metrics(current, world, robot)
+
+    def record_apply_event(self, *, tick: int, event: DomainEvent) -> None:
+        self.on_event_applied(tick=tick, event=event)
+
+    def record_replan_result(
+        self,
+        *,
+        tick: int,
+        replanned: bool,
+        found_path: bool,
+        world: World,
+        robot: RobotState,
+        reason: str | None,
+    ) -> None:
+        self.on_replan(
+            tick=tick,
+            replanned=replanned,
+            found_path=found_path,
+            world=world,
+            robot=robot,
+            reason=reason,
+        )
+
+    def record_step(
+        self,
+        *,
+        tick: int,
+        moved: bool,
+        world: World,
+        robot: RobotState,
+        step_cost: float = 0.0,
+    ) -> None:
+        self.on_step_executed(
+            tick=tick,
+            moved=moved,
+            world=world,
+            robot=robot,
+            step_cost=step_cost,
+        )
 
     def record_zone_added(self, *, tick: int, zone_type: object, cells: int, duration_ticks: int | None) -> None:
         del zone_type, cells, duration_ticks
