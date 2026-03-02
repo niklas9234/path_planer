@@ -24,14 +24,17 @@ class PolicyContext:
     robot: RobotState
     path_length: int
     remaining_path_length: int
+    remaining_path: tuple[Position, ...]
     remaining_path_cells: frozenset[Position]
+    planned_cost_by_cell: dict[Position, float]
     obstacle_cells_changed: frozenset[Position]
     cost_cells_changed: frozenset[Position]
     world_reinitialized: bool
 
     @classmethod
     def from_state(cls, state: SimulationState) -> PolicyContext:
-        remaining_cells = state.robot.remaining_path_cells()
+        remaining_path = tuple(state.robot.path[state.robot.path_index :])
+        remaining_cells = set(remaining_path)
         return cls(
             tick=state.tick,
             has_goal=state.robot.has_goal(),
@@ -42,7 +45,9 @@ class PolicyContext:
             robot=state.robot,
             path_length=len(state.robot.path),
             remaining_path_length=len(remaining_cells),
+            remaining_path=remaining_path,
             remaining_path_cells=frozenset(remaining_cells),
+            planned_cost_by_cell=dict(state.robot.planned_cost_by_cell),
             obstacle_cells_changed=frozenset(state.world_delta.obstacle_cells_changed),
             cost_cells_changed=frozenset(state.world_delta.cost_cells_changed),
             world_reinitialized=state.world_delta.world_reinitialized,
@@ -57,17 +62,23 @@ class ReplanPolicy(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class PeriodicReplanPolicy:
-    interval_ticks: int = 1
+    interval: int = 1
+
+    @property
+    def interval_ticks(self) -> int:
+        return self.interval
 
     def __post_init__(self) -> None:
-        if self.interval_ticks <= 0:
-            raise ValueError("interval_ticks must be > 0.")
+        if self.interval <= 0:
+            raise ValueError("interval must be > 0.")
 
     def decide(self, ctx: PolicyContext) -> PolicyDecision:
         if not ctx.has_goal:
             return PolicyDecision(replan=False)
-        if ctx.tick % self.interval_ticks == 0:
-            return PolicyDecision(replan=True, reason="periodic")
+        if not ctx.dirty_replan:
+            return PolicyDecision(replan=False)
+        if ctx.tick % self.interval == 0:
+            return PolicyDecision(replan=True, reason="periodic_dirty")
         return PolicyDecision(replan=False)
 
     def should_replan(self, state: SimulationState) -> tuple[bool, str | None]:
@@ -90,12 +101,6 @@ class EventBasedReplanPolicy:
 
 
 @dataclass(frozen=True, slots=True)
-class StaticOnceReplanPolicy:
-    def should_replan(self, state: SimulationState) -> tuple[bool, str | None]:
-        return False, None
-
-
-@dataclass(frozen=True, slots=True)
 class NoReplanPolicy:
     def decide(self, ctx: PolicyContext) -> PolicyDecision:
         del ctx
@@ -108,13 +113,21 @@ class NoReplanPolicy:
 
 @dataclass(slots=True)
 class StaticOnceReplanPolicy:
-    _did_initial_replan: bool = False
+    """Trigger exactly one event-driven replan per policy instance.
+
+    Behavior on goal changes is intentionally *not* reset automatically: once the
+    initial replan has happened, later `goal_changed` events do not trigger another
+    static replan. To get one initial replan for a new run/goal lifecycle, create
+    a new policy instance.
+    """
+
+    planned_once: bool = False
 
     def decide(self, ctx: PolicyContext) -> PolicyDecision:
-        if self._did_initial_replan or not ctx.has_goal:
+        if not ctx.has_goal or not ctx.dirty_replan or self.planned_once:
             return PolicyDecision(replan=False)
-        self._did_initial_replan = True
-        return PolicyDecision(replan=True, reason="initial_static")
+        self.planned_once = True
+        return PolicyDecision(replan=True, reason="initial")
 
     def should_replan(self, state: SimulationState) -> tuple[bool, str | None]:
         decision = self.decide(PolicyContext.from_state(state))
@@ -126,28 +139,20 @@ class PathAffectedReplanPolicy:
     cost_delta_threshold: float = 0.0
 
     def decide(self, ctx: PolicyContext) -> PolicyDecision:
-        if not ctx.has_goal:
+        if not ctx.has_goal or not ctx.dirty_replan:
             return PolicyDecision(replan=False)
 
-        if "goal_changed" in ctx.replan_events or "robot_repositioned" in ctx.replan_events:
-            return PolicyDecision(replan=True, reason="event")
+        if not ctx.planned_cost_by_cell:
+            return PolicyDecision(replan=True, reason="path_signature_missing")
 
-        changed_cells = set(ctx.obstacle_cells_changed)
-        changed_cells.update(ctx.cost_cells_changed)
-
-        if ctx.world_reinitialized:
-            return PolicyDecision(replan=True, reason="path_affected")
-
-        if changed_cells and bool(ctx.remaining_path_cells.intersection(changed_cells)):
-            return PolicyDecision(replan=True, reason="path_affected")
-
-        if self.cost_delta_threshold > 0:
-            affected_cost = 0.0
-            for pos in ctx.cost_cells_changed:
-                if pos in ctx.remaining_path_cells:
-                    affected_cost += ctx.world.get_extra_cost(pos)
-            if affected_cost >= self.cost_delta_threshold:
-                return PolicyDecision(replan=True, reason="path_affected")
+        for pos in ctx.remaining_path:
+            if ctx.world.is_blocked(pos):
+                return PolicyDecision(replan=True, reason="path_blocked")
+            planned_cost = ctx.planned_cost_by_cell.get(pos)
+            if planned_cost is None:
+                return PolicyDecision(replan=True, reason="path_signature_missing")
+            if ctx.world.get_cell_cost(pos) != planned_cost:
+                return PolicyDecision(replan=True, reason="path_cost_changed")
 
         return PolicyDecision(replan=False)
 
@@ -167,8 +172,8 @@ def make_policy(policy_name: str, policy_params: Mapping[str, Any] | None = None
     if normalized in {"static_once", "static"}:
         return StaticOnceReplanPolicy()
     if normalized in {"periodic", "periodic_replan"}:
-        interval_ticks = int(params.get("interval_ticks", 1))
-        return PeriodicReplanPolicy(interval_ticks=interval_ticks)
+        interval = int(params.get("interval", params.get("interval_ticks", 1)))
+        return PeriodicReplanPolicy(interval=interval)
     if normalized in {"path_affected", "pathaffected"}:
         threshold = float(params.get("cost_delta_threshold", 0.0))
         return PathAffectedReplanPolicy(cost_delta_threshold=threshold)

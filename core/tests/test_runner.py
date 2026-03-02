@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from core.domain import AddObstacle, Position
 from core.experiments.runner import run_experiment
-from core.experiments.scenarios import required_scenarios
+from core.experiments.scenarios import ScenarioDefinition, ScenarioExpectation, WorldConfig, required_scenarios
 
 
 def _scenario_by_name(name: str):
@@ -36,11 +37,32 @@ def test_run_context_available_in_metrics_and_exports() -> None:
     assert payload["snapshots"][0]["meta"]["tick"] == result.run_result.ticks_executed
 
 
-def test_run_experiment_export_contains_policy_metadata() -> None:
-    scenario = _scenario_by_name("empty_world_reaches_goal")
+def test_periodic_runner_replans_minimally_without_changes_and_by_next_interval_with_change() -> None:
+    base_kwargs = dict(
+        world_config=WorldConfig(width=6, height=3),
+        start=Position(0, 0),
+        goal=Position(5, 0),
+        initial_obstacles=(),
+        initial_zones=(),
+        max_ticks=8,
+        policy_name="periodic",
+        policy_params={"interval": 3},
+        expectation=ScenarioExpectation(allowed_reasons=("goal_reached", "stalled", "max_ticks")),
+    )
 
-    result = run_experiment(scenario)
-    payload = result.to_export_dict()
+    no_change = ScenarioDefinition(
+        name="periodic_no_change",
+        scheduled_events={},
+        **base_kwargs,
+    )
+    with_change = ScenarioDefinition(
+        name="periodic_with_change",
+        scheduled_events={1: (AddObstacle(position=Position(0, 2)),)},
+        **base_kwargs,
+    )
 
-    assert payload["run_result"]["policy_name"] == scenario.policy_name
-    assert payload["run_result"]["policy_params"] == dict(scenario.policy_params)
+    no_change_result = run_experiment(no_change).run_result
+    with_change_result = run_experiment(with_change).run_result
+
+    assert no_change_result.replans == 1
+    assert with_change_result.replans >= 2

@@ -173,6 +173,9 @@ class SimulationEngine:
 
         start_index = 1 if result.path[0] == self.state.robot.position else 0
         self.state.robot.set_path(result.path, start_index=start_index)
+        self.state.robot.set_planned_cost_signature(
+            {pos: self.state.world.get_cell_cost(pos) for pos in self.state.robot.path[self.state.robot.path_index :]}
+        )
         self.state.dirty_replan = False
         self._clear_world_delta()
         self.state.replan_events.clear()
