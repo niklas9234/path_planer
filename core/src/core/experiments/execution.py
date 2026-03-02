@@ -7,7 +7,8 @@ from core.domain import AddObstacle, AddZone, SetGoal
 if TYPE_CHECKING:
     from core.experiments.scenarios import ScenarioDefinition
 from core.planning import Planner
-from core.simulation import SimulationEngine, SimulationState, run_tick
+from core.planning.astar import NoPath
+from core.simulation import EventBasedReplanPolicy, NoReplanPolicy, SimulationEngine, SimulationState, run_tick
 from core.simulation.loop import RunResult
 
 
@@ -38,6 +39,24 @@ def execute_scenario(
     replans = 0
     moves = 0
 
+    replan_policy = EventBasedReplanPolicy()
+    if scenario.replan_mode == "static_once":
+        try:
+            engine.replan(planner, reason="initial_static")
+            replans += 1
+        except NoPath:
+            return (
+                RunResult(
+                    ticks_executed=engine.state.tick,
+                    replans=1,
+                    moves=0,
+                    done=True,
+                    reason="stalled",
+                ),
+                engine,
+            )
+        replan_policy = NoReplanPolicy()
+
     for _ in range(max_ticks):
         for obstacle in scenario.dynamic_obstacles_by_tick.get(engine.state.tick, ()):
             engine.apply(AddObstacle(position=obstacle))
@@ -51,7 +70,7 @@ def execute_scenario(
                 ),
             )
 
-        tick = run_tick(engine, planner)
+        tick = run_tick(engine, planner, replan_policy=replan_policy)
         if tick.replanned:
             replans += 1
         if tick.moved:

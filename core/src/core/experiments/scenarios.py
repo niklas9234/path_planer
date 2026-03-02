@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Literal
 
 from core.domain import Position, ZoneType
 from core.experiments.execution import execute_scenario
@@ -31,6 +32,7 @@ class ScenarioDefinition:
     dynamic_obstacles_by_tick: dict[int, tuple[Position, ...]]
     dynamic_zones_by_tick: dict[int, tuple[tuple[ZoneType, tuple[Position, ...], int | None, float], ...]]
     expectation: ScenarioExpectation
+    replan_mode: Literal["dynamic_event", "static_once"] = "dynamic_event"
 
 
 def run_scenario(scenario: ScenarioDefinition, planner: Planner = plan) -> RunResult:
