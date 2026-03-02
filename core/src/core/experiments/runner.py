@@ -94,7 +94,7 @@ def run_scenario_experiment(
         moves=run_result.moves,
         reason=run_result.reason,
         goal_reached=run_result.reason == "goal_reached",
-        total_cost=float(finalized.get("steps_taken", 0)),
+        total_cost=float(finalized.get("total_travel_cost", 0.0)),
     )
 
     tick_metrics = [_tick_to_dict(item) for item in engine.state.metrics.ticks if item.tick > 0]

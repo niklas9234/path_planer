@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from core.domain.events import AddObstacle, AddZone, SetGoal
+from core.domain.events import AddObstacle, AddZone, ClearExtraCost, SetExtraCost, SetGoal
 from core.domain.position import Position
 from core.domain.world import ZoneType
 from core.planning.astar import plan
@@ -11,6 +11,11 @@ from core.simulation.state import SimulationState
 
 def _make_engine() -> SimulationEngine:
     state = SimulationState.create(width=4, height=3, robot_position=Position(0, 1))
+    return SimulationEngine(state)
+
+
+def _make_linear_engine() -> SimulationEngine:
+    state = SimulationState.create(width=4, height=1, robot_position=Position(0, 0))
     return SimulationEngine(state)
 
 
@@ -35,6 +40,11 @@ def test_metrics_start_goal_obstacle_replanning_finalize() -> None:
     assert metrics["path_length_current"] == 0
     assert metrics["path_cost_current"] == 0.0
     assert metrics["steps_taken"] == 3
+    assert metrics["total_moves"] == 3
+    assert metrics["total_ticks"] == 3
+    assert metrics["ticks_executed"] == 3
+    assert metrics["total_travel_cost"] == 3.0
+    assert metrics["mean_step_cost"] == 1.0
     assert metrics["goal_reached"] is True
     assert metrics["ticks_to_goal"] == 3
     assert metrics["no_path_events"] == 0
@@ -72,3 +82,52 @@ def test_metrics_counts_zone_expiration() -> None:
     run_until_done(engine, plan)
 
     assert engine.state.metrics.zone_expirations_total >= 1
+
+
+def test_metrics_travel_cost_reflects_slowzone_with_equal_step_count() -> None:
+    baseline = _make_linear_engine()
+    baseline.apply(SetGoal(goal=Position(3, 0)))
+    baseline_result = run_until_done(baseline, plan)
+
+    assert baseline_result.reason == "goal_reached"
+    assert baseline_result.run_metrics is not None
+
+    slowzone = _make_linear_engine()
+    slowzone.apply(SetGoal(goal=Position(3, 0)))
+    slowzone.apply(SetExtraCost(position=Position(1, 0), value=4.0))
+    slowzone_result = run_until_done(slowzone, plan)
+
+    assert slowzone_result.reason == "goal_reached"
+    assert slowzone_result.run_metrics is not None
+
+    baseline_metrics = baseline_result.run_metrics
+    slowzone_metrics = slowzone_result.run_metrics
+
+    assert baseline_metrics["steps_taken"] == slowzone_metrics["steps_taken"] == 3
+    assert slowzone_metrics["total_travel_cost"] > baseline_metrics["total_travel_cost"]
+
+
+def test_metrics_travel_cost_without_slowzone_remains_base_cost() -> None:
+    engine = _make_engine()
+    engine.apply(SetGoal(goal=Position(3, 1)))
+
+    run_result = run_until_done(engine, plan)
+
+    assert run_result.reason == "goal_reached"
+    assert run_result.run_metrics is not None
+    assert run_result.run_metrics["steps_taken"] == 3
+    assert run_result.run_metrics["total_travel_cost"] == 3.0
+
+
+def test_metrics_travel_cost_handles_slowzone_clear() -> None:
+    engine = _make_linear_engine()
+    engine.apply(SetGoal(goal=Position(3, 0)))
+    engine.apply(SetExtraCost(position=Position(1, 0), value=5.0))
+    engine.apply(ClearExtraCost(position=Position(1, 0)))
+
+    run_result = run_until_done(engine, plan)
+
+    assert run_result.reason == "goal_reached"
+    assert run_result.run_metrics is not None
+    assert run_result.run_metrics["steps_taken"] == 3
+    assert run_result.run_metrics["total_travel_cost"] == 3.0

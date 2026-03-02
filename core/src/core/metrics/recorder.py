@@ -40,6 +40,7 @@ class MetricsRecorder:
     obstacle_changes_total: int = 0
     zone_expirations_total: int = 0
     steps_taken_total: int = 0
+    travel_cost_total: float = 0.0
     last_replan_trigger_reason: str | None = None
 
     def _current_tick(self, tick: int) -> TickMetrics:
@@ -102,10 +103,19 @@ class MetricsRecorder:
             current.replan_count = 0
         self._update_path_metrics(current, world, robot)
 
-    def record_step(self, *, tick: int, moved: bool, world: World, robot: RobotState) -> None:
+    def record_step(
+        self,
+        *,
+        tick: int,
+        moved: bool,
+        world: World,
+        robot: RobotState,
+        step_cost: float = 0.0,
+    ) -> None:
         current = self._current_tick(tick)
         if moved:
             self.steps_taken_total += 1
+            self.travel_cost_total += step_cost
         current.steps_taken = self.steps_taken_total
         current.goal_reached = robot.at_goal()
         if current.goal_reached and current.ticks_to_goal is None:
@@ -127,13 +137,22 @@ class MetricsRecorder:
         final_path_len = self.ticks[-1].path_length_current if self.ticks else 0
         final_path_cost = self.ticks[-1].path_cost_current if self.ticks else 0.0
 
+        total_ticks = self.ticks[-1].tick if self.ticks else 0
+        total_moves = self.steps_taken_total
+        total_travel_cost = self.travel_cost_total
+
         return {
             "ticks_recorded": len(self.ticks),
+            "total_ticks": total_ticks,
+            "ticks_executed": total_ticks,
             "replan_count": self.replan_count_total,
             "replan_trigger_reason": self.last_replan_trigger_reason,
             "path_length_current": final_path_len,
             "path_cost_current": final_path_cost,
             "steps_taken": self.steps_taken_total,
+            "total_moves": total_moves,
+            "total_travel_cost": total_travel_cost,
+            "mean_step_cost": (total_travel_cost / total_moves) if total_moves else 0.0,
             "goal_reached": any(item.goal_reached for item in self.ticks),
             "ticks_to_goal": goal_tick,
             "no_path_events": self.no_path_events_total,

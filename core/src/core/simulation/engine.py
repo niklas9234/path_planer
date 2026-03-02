@@ -220,6 +220,7 @@ class SimulationEngine:
             )
             return False
 
+        step_cost = self.state.world.get_cell_cost(waypoint)
         self.state.robot.set_position(waypoint, clear_plan=False)
         self.state.robot.advance_waypoint()
         self.state.metrics.record_step(
@@ -227,6 +228,7 @@ class SimulationEngine:
             moved=True,
             world=self.state.world,
             robot=self.state.robot,
+            step_cost=step_cost,
         )
         return True
 
