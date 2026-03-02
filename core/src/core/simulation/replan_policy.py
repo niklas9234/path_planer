@@ -24,14 +24,17 @@ class PolicyContext:
     robot: RobotState
     path_length: int
     remaining_path_length: int
+    remaining_path: tuple[Position, ...]
     remaining_path_cells: frozenset[Position]
+    planned_cost_by_cell: dict[Position, float]
     obstacle_cells_changed: frozenset[Position]
     cost_cells_changed: frozenset[Position]
     world_reinitialized: bool
 
     @classmethod
     def from_state(cls, state: SimulationState) -> PolicyContext:
-        remaining_cells = state.robot.remaining_path_cells()
+        remaining_path = tuple(state.robot.path[state.robot.path_index :])
+        remaining_cells = set(remaining_path)
         return cls(
             tick=state.tick,
             has_goal=state.robot.has_goal(),
@@ -42,7 +45,9 @@ class PolicyContext:
             robot=state.robot,
             path_length=len(state.robot.path),
             remaining_path_length=len(remaining_cells),
+            remaining_path=remaining_path,
             remaining_path_cells=frozenset(remaining_cells),
+            planned_cost_by_cell=dict(state.robot.planned_cost_by_cell),
             obstacle_cells_changed=frozenset(state.world_delta.obstacle_cells_changed),
             cost_cells_changed=frozenset(state.world_delta.cost_cells_changed),
             world_reinitialized=state.world_delta.world_reinitialized,
@@ -126,28 +131,20 @@ class PathAffectedReplanPolicy:
     cost_delta_threshold: float = 0.0
 
     def decide(self, ctx: PolicyContext) -> PolicyDecision:
-        if not ctx.has_goal:
+        if not ctx.has_goal or not ctx.dirty_replan:
             return PolicyDecision(replan=False)
 
-        if "goal_changed" in ctx.replan_events or "robot_repositioned" in ctx.replan_events:
-            return PolicyDecision(replan=True, reason="event")
+        if not ctx.planned_cost_by_cell:
+            return PolicyDecision(replan=True, reason="path_signature_missing")
 
-        changed_cells = set(ctx.obstacle_cells_changed)
-        changed_cells.update(ctx.cost_cells_changed)
-
-        if ctx.world_reinitialized:
-            return PolicyDecision(replan=True, reason="path_affected")
-
-        if changed_cells and bool(ctx.remaining_path_cells.intersection(changed_cells)):
-            return PolicyDecision(replan=True, reason="path_affected")
-
-        if self.cost_delta_threshold > 0:
-            affected_cost = 0.0
-            for pos in ctx.cost_cells_changed:
-                if pos in ctx.remaining_path_cells:
-                    affected_cost += ctx.world.get_extra_cost(pos)
-            if affected_cost >= self.cost_delta_threshold:
-                return PolicyDecision(replan=True, reason="path_affected")
+        for pos in ctx.remaining_path:
+            if ctx.world.is_blocked(pos):
+                return PolicyDecision(replan=True, reason="path_blocked")
+            planned_cost = ctx.planned_cost_by_cell.get(pos)
+            if planned_cost is None:
+                return PolicyDecision(replan=True, reason="path_signature_missing")
+            if ctx.world.get_cell_cost(pos) != planned_cost:
+                return PolicyDecision(replan=True, reason="path_cost_changed")
 
         return PolicyDecision(replan=False)
 

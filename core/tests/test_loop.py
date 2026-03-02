@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from core.domain import AddObstacle, Position, SetGoal
+from core.domain import AddObstacle, Position, SetExtraCost, SetGoal
 from core.planning import plan
 from core.simulation import (
     NoReplanPolicy,
@@ -50,7 +50,7 @@ def test_periodic_policy_replans_every_two_ticks() -> None:
     assert t2.replanned is False
 
 
-def test_path_affected_policy_replans_only_when_remaining_path_cut() -> None:
+def test_path_affected_policy_ignores_changes_outside_remaining_path() -> None:
     engine = _make_engine()
     engine.apply(SetGoal(goal=Position(4, 4)))
     run_tick(engine, plan, replan_policy=PathAffectedReplanPolicy())
@@ -58,12 +58,60 @@ def test_path_affected_policy_replans_only_when_remaining_path_cut() -> None:
     engine.apply(AddObstacle(position=Position(4, 0)))
     unaffected = run_tick(engine, plan, replan_policy=PathAffectedReplanPolicy())
 
-    engine.apply(AddObstacle(position=Position(3, 3)))
+    assert unaffected.replanned is False
+
+
+def test_path_affected_policy_replans_on_slow_zone_in_remaining_path() -> None:
+    engine = _make_engine()
+    engine.apply(SetGoal(goal=Position(4, 4)))
+    run_tick(engine, plan, replan_policy=PathAffectedReplanPolicy())
+
+    waypoint = engine.state.robot.next_waypoint()
+    assert waypoint is not None
+    engine.apply(SetExtraCost(position=waypoint, value=5.0))
+
     affected = run_tick(engine, plan, replan_policy=PathAffectedReplanPolicy())
 
-    assert unaffected.replanned is False
     assert affected.replanned is True
 
+
+def test_path_affected_policy_ignores_slow_zone_outside_remaining_path() -> None:
+    engine = _make_engine()
+    engine.apply(SetGoal(goal=Position(4, 4)))
+    run_tick(engine, plan, replan_policy=PathAffectedReplanPolicy())
+
+    engine.apply(SetExtraCost(position=Position(4, 0), value=5.0))
+    unaffected = run_tick(engine, plan, replan_policy=PathAffectedReplanPolicy())
+
+    assert unaffected.replanned is False
+
+
+def test_path_affected_policy_replans_on_blocked_remaining_path_cell() -> None:
+    engine = _make_engine()
+    engine.apply(SetGoal(goal=Position(4, 4)))
+    run_tick(engine, plan, replan_policy=PathAffectedReplanPolicy())
+
+    waypoint = engine.state.robot.next_waypoint()
+    assert waypoint is not None
+    engine.apply(AddObstacle(position=waypoint))
+
+    affected = run_tick(engine, plan, replan_policy=PathAffectedReplanPolicy())
+
+    assert affected.replanned is True
+
+
+
+
+def test_path_affected_policy_replans_when_signature_missing() -> None:
+    engine = _make_engine()
+    engine.apply(SetGoal(goal=Position(4, 4)))
+    run_tick(engine, plan, replan_policy=PathAffectedReplanPolicy())
+
+    engine.state.robot.planned_cost_by_cell.clear()
+    engine.apply(AddObstacle(position=Position(4, 0)))
+    decision = run_tick(engine, plan, replan_policy=PathAffectedReplanPolicy())
+
+    assert decision.replanned is True
 
 def test_no_replan_policy_keeps_existing_path_when_event_marks_dirty() -> None:
     engine = _make_engine()
