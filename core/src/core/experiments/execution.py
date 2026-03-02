@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Mapping
 
 from core.domain import AddObstacle, AddZone, SetGoal
 
@@ -48,36 +48,41 @@ def execute_scenario(
     planner: Planner,
     *,
     max_ticks: int,
+    policy_name: str | None = None,
+    policy_params: Mapping[str, object] | None = None,
 ) -> tuple[RunResult, SimulationEngine]:
-    replan_policy = _policy_from_scenario(scenario)
+    effective_policy_name = policy_name or scenario.policy_name
+    effective_policy_params = {**scenario.policy_params, **(dict(policy_params or {}))}
+    replan_policy = _policy_from_name(effective_policy_name, effective_policy_params)
 
     return run_once(
         scenario,
         policy=replan_policy,
         planner=planner,
         max_ticks=max_ticks,
+        policy_name=effective_policy_name,
     )
 
-
-
-
-def _policy_from_scenario(scenario: ScenarioDefinition) -> ReplanPolicy:
-    policy_name = scenario.policy_name
-    if scenario.replan_mode is not None and not policy_name:
-        policy_name = "static_once" if scenario.replan_mode == "static_once" else "event_based"
-
+def _policy_from_name(policy_name: str, policy_params: Mapping[str, object]) -> ReplanPolicy:
     if policy_name == "static_once":
         return NoReplanPolicy()
     if policy_name == "event_based":
         return EventBasedReplanPolicy()
+    if policy_name == "periodic":
+        interval = int(policy_params.get("interval", 1))
+        return PeriodicReplanPolicy(interval_ticks=interval)
+    if policy_name == "path_affected":
+        threshold = float(policy_params.get("cost_delta_threshold", 0.0))
+        return PathAffectedReplanPolicy(cost_delta_threshold=threshold)
 
-    raise ValueError(f"Unsupported policy_name '{scenario.policy_name}' for scenario '{scenario.name}'.")
+    raise ValueError(f"Unsupported policy_name '{policy_name}'.")
 
 def run_once(
     scenario: ScenarioDefinition,
     policy: ReplanPolicy,
     planner: Planner,
     max_ticks: int,
+    policy_name: str | None = None,
 ) -> tuple[RunResult, SimulationEngine]:
     if max_ticks <= 0:
         raise ValueError(f"max_ticks must be > 0, got {max_ticks}.")
@@ -86,7 +91,9 @@ def run_once(
     replans = 0
     moves = 0
 
-    if scenario.policy_name == "static_once":
+    resolved_policy_name = policy_name or scenario.policy_name
+
+    if resolved_policy_name == "static_once":
         try:
             engine.replan(planner, reason="initial_static")
             replans += 1
@@ -106,7 +113,7 @@ def run_once(
             return (
                 RunResult(
                     scenario_name=scenario.name,
-                    policy_name=type(policy).__name__,
+                    policy_name=resolved_policy_name,
                     seed=None,
                     ticks_executed=engine.state.tick,
                     replans=replans,
@@ -129,7 +136,7 @@ def run_once(
             return (
                 RunResult(
                     scenario_name=scenario.name,
-                    policy_name=type(policy).__name__,
+                    policy_name=resolved_policy_name,
                     seed=None,
                     ticks_executed=engine.state.tick,
                     replans=replans,
@@ -145,7 +152,7 @@ def run_once(
     return (
         RunResult(
             scenario_name=scenario.name,
-            policy_name=type(policy).__name__,
+            policy_name=resolved_policy_name,
             seed=None,
             ticks_executed=engine.state.tick,
             replans=replans,
