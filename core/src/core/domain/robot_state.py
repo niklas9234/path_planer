@@ -13,6 +13,7 @@ class RobotState:
     path: list[Position] | None = None
     path_index: int = 0
     speed_mps: float = 1.0
+    planned_cost_by_cell: dict[Position, float] = field(default_factory=dict)
     _remaining_path_set: set[Position] = field(default_factory=set, init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -30,6 +31,7 @@ class RobotState:
     def clear_plan(self) -> None:
         self.path.clear()
         self.path_index = 0
+        self.planned_cost_by_cell.clear()
         self._remaining_path_set.clear()
 
     def set_goal(self, goal: Position) -> None:
@@ -50,7 +52,13 @@ class RobotState:
         if start_index < 0:
             raise ValueError("start_index must be >= 0.")
         self.path_index = start_index
+        self.planned_cost_by_cell.clear()
         self._rebuild_remaining_path_set()
+
+    def set_planned_cost_signature(self, planned_cost_by_cell: dict[Position, float]) -> None:
+        self.planned_cost_by_cell = {
+            pos: cost for pos, cost in planned_cost_by_cell.items() if pos in self._remaining_path_set
+        }
 
     def next_waypoint(self) -> Position | None:
         if self.path_index >= len(self.path):
@@ -61,6 +69,7 @@ class RobotState:
         if self.path_index < len(self.path):
             visited = self.path[self.path_index]
             self._remaining_path_set.discard(visited)
+            self.planned_cost_by_cell.pop(visited, None)
             self.path_index += 1
 
     def remaining_path_cells(self) -> set[Position]:
