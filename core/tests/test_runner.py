@@ -16,7 +16,7 @@ def _scenario_by_name(name: str):
 
 
 def test_run_experiment_is_reproducible_for_fixed_inputs() -> None:
-    scenario = _scenario_by_name("replan_after_obstacle")
+    scenario = _scenario_by_name("s05_dynamic_obstacle_corridor")
 
     first = run_experiment(scenario)
     second = run_experiment(scenario)
@@ -30,7 +30,7 @@ def test_run_experiment_is_reproducible_for_fixed_inputs() -> None:
 
 
 def test_run_context_available_in_metrics_and_exports() -> None:
-    scenario = _scenario_by_name("empty_world_reaches_goal")
+    scenario = _scenario_by_name("s01_corridor_baseline")
 
     result = run_experiment(scenario)
     payload = result.to_export_dict()
@@ -78,7 +78,7 @@ def test_periodic_runner_replans_minimally_without_changes_and_by_next_interval_
 
 
 def test_run_result_tracks_policy_impl_module() -> None:
-    scenario = _scenario_by_name("empty_world_reaches_goal")
+    scenario = _scenario_by_name("s01_corridor_baseline")
 
     result = run_experiment(scenario)
 

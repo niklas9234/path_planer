@@ -9,6 +9,15 @@ from core.experiments import (
     run_scenario,
 )
 
+EXPECTED_SCENARIOS = {
+    "s01_corridor_baseline",
+    "s02_corridor_static",
+    "s03_long_slow_zone_corridor",
+    "s04_short_slow_zone_corridor",
+    "s05_dynamic_obstacle_corridor",
+    "s06_dynamic_zone_then_block",
+}
+
 
 def _scenario_by_name(name: str):
     scenarios = {scenario.name: scenario for scenario in required_scenarios()}
@@ -22,8 +31,14 @@ def test_required_scenarios_define_policy_name() -> None:
     assert all(scenario.policy_name for scenario in scenarios)
 
 
-def test_empty_world_reaches_goal() -> None:
-    scenario = _scenario_by_name("empty_world_reaches_goal")
+def test_required_scenarios_match_bachelor_scenario_set() -> None:
+    names = {scenario.name for scenario in required_scenarios()}
+
+    assert names == EXPECTED_SCENARIOS
+
+
+def test_s01_corridor_baseline_reaches_goal() -> None:
+    scenario = _scenario_by_name("s01_corridor_baseline")
 
     result = run_scenario(scenario)
 
@@ -31,22 +46,21 @@ def test_empty_world_reaches_goal() -> None:
     assert result.moves > 0
 
 
-def test_blocked_goal_stalls() -> None:
-    scenario = _scenario_by_name("blocked_goal_stalls")
-
-    result = run_scenario(scenario)
-
-    assert result.reason == "stalled"
-    assert result.moves == 0
-
-
-def test_replan_after_obstacle() -> None:
-    scenario = _scenario_by_name("replan_after_obstacle")
+def test_s05_dynamic_obstacle_triggers_replans() -> None:
+    scenario = _scenario_by_name("s05_dynamic_obstacle_corridor")
 
     result = run_scenario(scenario)
 
     assert result.replans >= 1
-    assert result.reason in {"goal_reached", "stalled"}
+    assert result.reason in {"goal_reached", "stalled", "max_ticks"}
+
+
+def test_s06_dynamic_zone_then_block_runs_to_terminal_reason() -> None:
+    scenario = _scenario_by_name("s06_dynamic_zone_then_block")
+
+    result = run_scenario(scenario)
+
+    assert result.reason in {"goal_reached", "stalled", "max_ticks"}
 
 
 def test_static_once_includes_initial_replan() -> None:
@@ -66,23 +80,6 @@ def test_static_once_includes_initial_replan() -> None:
     result = run_scenario(scenario)
 
     assert result.replans == 1
-
-
-def test_max_ticks_guard() -> None:
-    scenario = _scenario_by_name("max_ticks_guard")
-
-    result = run_scenario(scenario)
-
-    assert result.reason == "max_ticks"
-
-
-def test_temporary_slow_zone_expires() -> None:
-    scenario = _scenario_by_name("temporary_slow_zone_expires")
-
-    result = run_scenario(scenario)
-
-    assert result.reason == "goal_reached"
-    assert result.replans >= 1
 
 
 def test_policy_name_static_once_vs_event_based() -> None:
