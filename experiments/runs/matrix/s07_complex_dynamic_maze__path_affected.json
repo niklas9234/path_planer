@@ -1,0 +1,36 @@
+{
+  "summary": {
+    "scenario": "s07_complex_dynamic_maze",
+    "planner": "astar",
+    "policy_name": "path_affected",
+    "policy_params": {
+      "cost_delta_threshold": 0.0
+    },
+    "ticks_executed": 30,
+    "replans": 1,
+    "moves": 30,
+    "reason": "goal_reached",
+    "goal_reached": true,
+    "total_cost": 30.0
+  },
+  "snapshot": {
+    "meta": {
+      "tick": 30,
+      "scenario": "s07_complex_dynamic_maze"
+    },
+    "world": {
+      "width": 30,
+      "height": 30
+    },
+    "robot": {
+      "position": {
+        "x": 27,
+        "y": 27
+      },
+      "goal": {
+        "x": 27,
+        "y": 27
+      }
+    }
+  }
+}

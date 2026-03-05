@@ -1,0 +1,36 @@
+{
+  "summary": {
+    "scenario": "s01_corridor_baseline",
+    "planner": "astar",
+    "policy_name": "periodic",
+    "policy_params": {
+      "interval": 5
+    },
+    "ticks_executed": 11,
+    "replans": 1,
+    "moves": 11,
+    "reason": "goal_reached",
+    "goal_reached": true,
+    "total_cost": 11.0
+  },
+  "snapshot": {
+    "meta": {
+      "tick": 11,
+      "scenario": "s01_corridor_baseline"
+    },
+    "world": {
+      "width": 12,
+      "height": 3
+    },
+    "robot": {
+      "position": {
+        "x": 11,
+        "y": 1
+      },
+      "goal": {
+        "x": 11,
+        "y": 1
+      }
+    }
+  }
+}

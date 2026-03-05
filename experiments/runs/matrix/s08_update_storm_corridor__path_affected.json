@@ -1,0 +1,36 @@
+{
+  "summary": {
+    "scenario": "s08_update_storm_corridor",
+    "planner": "astar",
+    "policy_name": "path_affected",
+    "policy_params": {
+      "cost_delta_threshold": 0.0
+    },
+    "ticks_executed": 79,
+    "replans": 29,
+    "moves": 79,
+    "reason": "goal_reached",
+    "goal_reached": true,
+    "total_cost": 79.0
+  },
+  "snapshot": {
+    "meta": {
+      "tick": 79,
+      "scenario": "s08_update_storm_corridor"
+    },
+    "world": {
+      "width": 80,
+      "height": 3
+    },
+    "robot": {
+      "position": {
+        "x": 79,
+        "y": 1
+      },
+      "goal": {
+        "x": 79,
+        "y": 1
+      }
+    }
+  }
+}

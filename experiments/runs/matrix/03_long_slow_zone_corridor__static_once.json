@@ -1,0 +1,34 @@
+{
+  "summary": {
+    "scenario": "03_long_slow_zone_corridor",
+    "planner": "astar",
+    "policy_name": "static_once",
+    "policy_params": {},
+    "ticks_executed": 11,
+    "replans": 1,
+    "moves": 11,
+    "reason": "goal_reached",
+    "goal_reached": true,
+    "total_cost": 11.0
+  },
+  "snapshot": {
+    "meta": {
+      "tick": 11,
+      "scenario": "03_long_slow_zone_corridor"
+    },
+    "world": {
+      "width": 12,
+      "height": 3
+    },
+    "robot": {
+      "position": {
+        "x": 11,
+        "y": 1
+      },
+      "goal": {
+        "x": 11,
+        "y": 1
+      }
+    }
+  }
+}

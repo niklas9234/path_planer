@@ -1,0 +1,34 @@
+{
+  "summary": {
+    "scenario": "s06_dynamic_zone_then_block",
+    "planner": "astar",
+    "policy_name": "static_once",
+    "policy_params": {},
+    "ticks_executed": 7,
+    "replans": 1,
+    "moves": 6,
+    "reason": "stalled",
+    "goal_reached": false,
+    "total_cost": 36.0
+  },
+  "snapshot": {
+    "meta": {
+      "tick": 7,
+      "scenario": "s06_dynamic_zone_then_block"
+    },
+    "world": {
+      "width": 12,
+      "height": 4
+    },
+    "robot": {
+      "position": {
+        "x": 6,
+        "y": 1
+      },
+      "goal": {
+        "x": 11,
+        "y": 1
+      }
+    }
+  }
+}

@@ -22,7 +22,7 @@ def build() -> ScenarioDefinition:
                     zone_type=ZoneType.SLOW,
                     cells=(Position(4, 1), Position(5, 1), Position(6, 1)),
                     duration_ticks=6,
-                    extra_cost=6.0,
+                    extra_cost=10.0,
                 ),
             ),
             4: (AddObstacle(position=Position(7, 1)),),

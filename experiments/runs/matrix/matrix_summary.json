@@ -1,0 +1,258 @@
+[
+  {
+    "Scenario": "s01_corridor_baseline",
+    "Policy": "static_once",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s01_corridor_baseline",
+    "Policy": "event_based",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s01_corridor_baseline",
+    "Policy": "periodic",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s01_corridor_baseline",
+    "Policy": "path_affected",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s02_corridor_static",
+    "Policy": "static_once",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s02_corridor_static",
+    "Policy": "event_based",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s02_corridor_static",
+    "Policy": "periodic",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s02_corridor_static",
+    "Policy": "path_affected",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "03_long_slow_zone_corridor",
+    "Policy": "static_once",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "03_long_slow_zone_corridor",
+    "Policy": "event_based",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "03_long_slow_zone_corridor",
+    "Policy": "periodic",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "03_long_slow_zone_corridor",
+    "Policy": "path_affected",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "04_short_slow_zone_corridor",
+    "Policy": "static_once",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "04_short_slow_zone_corridor",
+    "Policy": "event_based",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "04_short_slow_zone_corridor",
+    "Policy": "periodic",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "04_short_slow_zone_corridor",
+    "Policy": "path_affected",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "05_dynamic_obstacle_corridor",
+    "Policy": "static_once",
+    "total_cost": 5.0,
+    "ticks": 6,
+    "replans": 1,
+    "goal_reached": false
+  },
+  {
+    "Scenario": "05_dynamic_obstacle_corridor",
+    "Policy": "event_based",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "05_dynamic_obstacle_corridor",
+    "Policy": "periodic",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "05_dynamic_obstacle_corridor",
+    "Policy": "path_affected",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s06_dynamic_zone_then_block",
+    "Policy": "static_once",
+    "total_cost": 36.0,
+    "ticks": 7,
+    "replans": 1,
+    "goal_reached": false
+  },
+  {
+    "Scenario": "s06_dynamic_zone_then_block",
+    "Policy": "event_based",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 4,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s06_dynamic_zone_then_block",
+    "Policy": "periodic",
+    "total_cost": 31.0,
+    "ticks": 11,
+    "replans": 3,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s06_dynamic_zone_then_block",
+    "Policy": "path_affected",
+    "total_cost": 11.0,
+    "ticks": 11,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s07_complex_dynamic_maze",
+    "Policy": "static_once",
+    "total_cost": 30.0,
+    "ticks": 30,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s07_complex_dynamic_maze",
+    "Policy": "event_based",
+    "total_cost": 30.0,
+    "ticks": 30,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s07_complex_dynamic_maze",
+    "Policy": "periodic",
+    "total_cost": 30.0,
+    "ticks": 30,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s07_complex_dynamic_maze",
+    "Policy": "path_affected",
+    "total_cost": 30.0,
+    "ticks": 30,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s08_update_storm_corridor",
+    "Policy": "static_once",
+    "total_cost": 79.0,
+    "ticks": 79,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s08_update_storm_corridor",
+    "Policy": "event_based",
+    "total_cost": 79.0,
+    "ticks": 79,
+    "replans": 29,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s08_update_storm_corridor",
+    "Policy": "periodic",
+    "total_cost": 79.0,
+    "ticks": 79,
+    "replans": 7,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s08_update_storm_corridor",
+    "Policy": "path_affected",
+    "total_cost": 79.0,
+    "ticks": 79,
+    "replans": 29,
+    "goal_reached": true
+  }
+]

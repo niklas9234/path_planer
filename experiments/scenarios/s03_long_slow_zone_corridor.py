@@ -19,7 +19,7 @@ def build() -> ScenarioDefinition:
             ZoneDefinition(
                 zone_type=ZoneType.SLOW,
                 cells=tuple(Position(x, 1) for x in range(3, 9)),
-                extra_cost=4.0,
+                extra_cost=10.0,
             ),
         ),
         max_ticks=60,
