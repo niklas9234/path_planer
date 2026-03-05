@@ -126,6 +126,30 @@ docs/ticket-sys/   Lightweight ticket system used during development
 - Feature modules (planning, simulation, experiments, and upcoming CLI/metrics runners) should import domain/public APIs from package roots, e.g. `from core.domain import Position` and `from core.simulation import SimulationEngine`.
 - Avoid deep imports in new components unless extending the same package internals; this keeps public paths stable and prevents accidental circular dependencies.
 
+
+## Experiment Matrix Runner (6 Szenarien × 4 Policies)
+
+Für einen vollständigen Batch-Lauf (24 Runs) steht ein Python-Skript bereit:
+
+```bash
+python3 experiments/run_experiment_matrix.py --out-dir experiments/runs/matrix
+```
+
+Erzeugte Artefakte:
+- `matrix_summary.csv` mit den Spalten `Scenario, Policy, total_cost, ticks, replans, goal_reached`
+- `matrix_summary.json` mit denselben aggregierten Daten
+- pro Run eine JSON-Datei `<scenario>__<policy>.json`
+- Szenario-Definitionen liegen getrennt in `experiments/scenarios/` (eine Datei pro Szenario)
+
+Optional kannst du u. a. Policies einschränken oder Parameter setzen:
+
+```bash
+python3 experiments/run_experiment_matrix.py \
+  --policies static_once event_based periodic path_affected \
+  --periodic-interval 3 \
+  --path-affected-threshold 0.0
+```
+
 ## Notes
 
 This README intentionally focuses on **architecture and system behavior**.
