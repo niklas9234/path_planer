@@ -102,14 +102,18 @@ class SimulationEngine:
             self.state.tick = 0
             self.state.robot.clear_plan()
             self.state.dirty_replan = self.state.robot.goal is not None
-            self.state.replan_events = {"reset"} if self.state.robot.goal is not None else set()
+            self.state.replan_events = (
+                {"reset"} if self.state.robot.goal is not None else set()
+            )
             return
         raise TypeError(f"Unsupported event type: {type(event)!r}")
 
     def process_tick_updates(self) -> tuple[int, int]:
         changes = self.state.world.expire_zones(self.state.tick)
         if changes.obstacle_cells_changed:
-            self.state.world_delta.obstacle_cells_changed.update(changes.obstacle_cells_changed)
+            self.state.world_delta.obstacle_cells_changed.update(
+                changes.obstacle_cells_changed
+            )
         if changes.cost_cells_changed:
             self.state.world_delta.cost_cells_changed.update(changes.cost_cells_changed)
 
@@ -174,7 +178,10 @@ class SimulationEngine:
         start_index = 1 if result.path[0] == self.state.robot.position else 0
         self.state.robot.set_path(result.path, start_index=start_index)
         self.state.robot.set_planned_cost_signature(
-            {pos: self.state.world.get_cell_cost(pos) for pos in self.state.robot.path[self.state.robot.path_index :]}
+            {
+                pos: self.state.world.get_cell_cost(pos)
+                for pos in self.state.robot.path[self.state.robot.path_index :]
+            }
         )
         self.state.dirty_replan = False
         self._clear_world_delta()

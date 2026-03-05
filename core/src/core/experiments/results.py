@@ -45,12 +45,14 @@ class ExperimentResult:
                         "x": snapshot.robot_position.x,
                         "y": snapshot.robot_position.y,
                     },
-                    "goal_position": None
-                    if snapshot.goal_position is None
-                    else {
-                        "x": snapshot.goal_position.x,
-                        "y": snapshot.goal_position.y,
-                    },
+                    "goal_position": (
+                        None
+                        if snapshot.goal_position is None
+                        else {
+                            "x": snapshot.goal_position.x,
+                            "y": snapshot.goal_position.y,
+                        }
+                    ),
                 }
                 for snapshot in self.snapshots
             ],

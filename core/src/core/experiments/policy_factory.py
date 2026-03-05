@@ -12,7 +12,9 @@ from core.simulation import (
 )
 
 
-def _validate_param_keys(policy_name: str, params: dict[str, Any], allowed_keys: set[str]) -> None:
+def _validate_param_keys(
+    policy_name: str, params: dict[str, Any], allowed_keys: set[str]
+) -> None:
     unknown_keys = sorted(set(params) - allowed_keys)
     if unknown_keys:
         allowed = ", ".join(sorted(allowed_keys)) or "<none>"
@@ -39,7 +41,9 @@ def _make_periodic(params: dict[str, Any]) -> ReplanPolicy:
     try:
         interval_ticks = int(interval)
     except (TypeError, ValueError) as exc:
-        raise ValueError("Invalid parameter for policy 'periodic': interval must be an integer.") from exc
+        raise ValueError(
+            "Invalid parameter for policy 'periodic': interval must be an integer."
+        ) from exc
     try:
         return PeriodicReplanPolicy(interval=interval_ticks)
     except ValueError as exc:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from core.experiments.scenarios import ScenarioDefinition
+
 from experiments.scenarios.blocked_goal_stalls import build as build_blocked_goal_stalls
 from experiments.scenarios.empty_world_reaches_goal import (
     build as build_empty_world_reaches_goal,
@@ -8,15 +9,6 @@ from experiments.scenarios.empty_world_reaches_goal import (
 from experiments.scenarios.max_ticks_guard import build as build_max_ticks_guard
 from experiments.scenarios.replan_after_obstacle import (
     build as build_replan_after_obstacle,
-)
-from experiments.scenarios.s03_long_slow_zone_corridor import (
-    build as build_s03_long_slow_zone_corridor,
-)
-from experiments.scenarios.s04_short_slow_zone_corridor import (
-    build as build_s04_short_slow_zone_corridor,
-)
-from experiments.scenarios.s05_dynamic_obstacle_corridor import (
-    build as build_s05_dynamic_obstacle_corridor,
 )
 from experiments.scenarios.temporary_slow_zone_expires import (
     build as build_temporary_slow_zone_expires,
@@ -32,9 +24,6 @@ SCENARIO_BUILDERS = (
     build_temporary_slow_zone_expires,
     build_max_ticks_guard,
     build_testpath_20x20_image_map,
-    build_s03_long_slow_zone_corridor,
-    build_s04_short_slow_zone_corridor,
-    build_s05_dynamic_obstacle_corridor,
 )
 
 

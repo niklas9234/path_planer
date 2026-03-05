@@ -131,7 +131,9 @@ def test_replan_mode_deprecated_mapping_and_policy_name_precedence() -> None:
         initial_zones=(),
         max_ticks=5,
         scheduled_events={},
-        expectation=ScenarioExpectation(allowed_reasons=("goal_reached", "stalled", "max_ticks")),
+        expectation=ScenarioExpectation(
+            allowed_reasons=("goal_reached", "stalled", "max_ticks")
+        ),
     )
     assert mapped.policy_name == "static_once"
 
@@ -146,6 +148,8 @@ def test_replan_mode_deprecated_mapping_and_policy_name_precedence() -> None:
         initial_zones=(),
         max_ticks=5,
         scheduled_events={},
-        expectation=ScenarioExpectation(allowed_reasons=("goal_reached", "stalled", "max_ticks")),
+        expectation=ScenarioExpectation(
+            allowed_reasons=("goal_reached", "stalled", "max_ticks")
+        ),
     )
     assert precedence.policy_name == "event_based"

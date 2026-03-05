@@ -12,9 +12,11 @@ from core.simulation.replan_policy import (
     PathAffectedReplanPolicy,
     PeriodicReplanPolicy,
     PolicyContext,
-    PolicyDecision as ReplanDecision,
     ReplanPolicy,
     StaticOnceReplanPolicy,
+)
+from core.simulation.replan_policy import (
+    PolicyDecision as ReplanDecision,
 )
 
 __all__ = [

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Mapping
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 from core.experiments.result_store import save_json, stable_filename
 from core.experiments.runner import run_scenario_experiment
@@ -13,7 +14,9 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="path-planner")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    run_parser = subparsers.add_parser("run-scenario", help="Run one scenario without frontend")
+    run_parser = subparsers.add_parser(
+        "run-scenario", help="Run one scenario without frontend"
+    )
     run_parser.add_argument("--scenario", required=True)
     run_parser.add_argument("--planner", default="astar")
     run_parser.add_argument(
@@ -61,7 +64,9 @@ def _coerce_cli_value(raw: str) -> object:
         return raw
 
 
-def _parse_policy_params(raw_items: list[str], periodic_interval: int | None) -> dict[str, Any]:
+def _parse_policy_params(
+    raw_items: list[str], periodic_interval: int | None
+) -> dict[str, Any]:
     params: dict[str, Any] = {}
     for item in raw_items:
         if "=" not in item:
@@ -77,10 +82,14 @@ def _parse_policy_params(raw_items: list[str], periodic_interval: int | None) ->
     return params
 
 
-def _format_policy_display(policy_name: str, policy_params: Mapping[str, object]) -> str:
+def _format_policy_display(
+    policy_name: str, policy_params: Mapping[str, object]
+) -> str:
     if not policy_params:
         return policy_name
-    rendered = ", ".join(f"{key}={value}" for key, value in sorted(policy_params.items()))
+    rendered = ", ".join(
+        f"{key}={value}" for key, value in sorted(policy_params.items())
+    )
     return f"{policy_name} ({rendered})"
 
 
@@ -92,7 +101,9 @@ def main(argv: list[str] | None = None) -> int:
         parser.error(f"Unsupported command: {args.command}")
 
     try:
-        cli_policy_params = _parse_policy_params(args.policy_param, args.periodic_interval)
+        cli_policy_params = _parse_policy_params(
+            args.policy_param, args.periodic_interval
+        )
         result = run_scenario_experiment(
             scenario_name=args.scenario,
             planner=args.planner,

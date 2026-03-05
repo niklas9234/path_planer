@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from core.domain import AddObstacle, Position
 from core.experiments.runner import run_experiment
-from core.experiments.scenarios import ScenarioDefinition, ScenarioExpectation, WorldConfig, required_scenarios
+from core.experiments.scenarios import (
+    ScenarioDefinition,
+    ScenarioExpectation,
+    WorldConfig,
+    required_scenarios,
+)
 
 
 def _scenario_by_name(name: str):
@@ -37,7 +42,9 @@ def test_run_context_available_in_metrics_and_exports() -> None:
     assert payload["snapshots"][0]["meta"]["tick"] == result.run_result.ticks_executed
 
 
-def test_periodic_runner_replans_minimally_without_changes_and_by_next_interval_with_change() -> None:
+def test_periodic_runner_replans_minimally_without_changes_and_by_next_interval_with_change() -> (
+    None
+):
     base_kwargs = dict(
         world_config=WorldConfig(width=6, height=3),
         start=Position(0, 0),
@@ -47,7 +54,9 @@ def test_periodic_runner_replans_minimally_without_changes_and_by_next_interval_
         max_ticks=8,
         policy_name="periodic",
         policy_params={"interval": 3},
-        expectation=ScenarioExpectation(allowed_reasons=("goal_reached", "stalled", "max_ticks")),
+        expectation=ScenarioExpectation(
+            allowed_reasons=("goal_reached", "stalled", "max_ticks")
+        ),
     )
 
     no_change = ScenarioDefinition(
@@ -74,4 +83,7 @@ def test_run_result_tracks_policy_impl_module() -> None:
     result = run_experiment(scenario)
 
     assert result.run_result.policy_impl_module == "core.simulation.replan_policy"
-    assert result.to_export_dict()["run_result"]["policy_impl_module"] == "core.simulation.replan_policy"
+    assert (
+        result.to_export_dict()["run_result"]["policy_impl_module"]
+        == "core.simulation.replan_policy"
+    )
