@@ -4,7 +4,7 @@ import hashlib
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from types import MappingProxyType
 from typing import Any
 
@@ -14,7 +14,13 @@ def _freeze_mapping(values: Mapping[str, Any] | None) -> Mapping[str, Any]:
     return MappingProxyType(frozen)
 
 
-def _stable_run_id(*, scenario_name: str, planner_name: str, planner_params: Mapping[str, Any], world_params: Mapping[str, Any]) -> str:
+def _stable_run_id(
+    *,
+    scenario_name: str,
+    planner_name: str,
+    planner_params: Mapping[str, Any],
+    world_params: Mapping[str, Any],
+) -> str:
     payload = {
         "planner_name": planner_name,
         "planner_params": dict(planner_params),
@@ -59,6 +65,6 @@ class RunContext:
             planner_name=planner_name,
             planner_params=frozen_planner_params,
             world_params=frozen_world_params,
-            started_at=started_at or datetime.now(timezone.utc),
+            started_at=started_at or datetime.now(UTC),
             core_version=core_version,
         )

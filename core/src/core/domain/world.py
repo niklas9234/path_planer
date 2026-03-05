@@ -87,7 +87,9 @@ class World:
 
     def is_blocked(self, pos: Position) -> bool:
         self.assert_in_bounds(pos.x, pos.y)
-        return self.blocked[pos.y][pos.x] or self._zone_blocked_refcount[pos.y][pos.x] > 0
+        return (
+            self.blocked[pos.y][pos.x] or self._zone_blocked_refcount[pos.y][pos.x] > 0
+        )
 
     def get_extra_cost(self, pos: Position) -> float:
         self.assert_in_bounds(pos.x, pos.y)
@@ -121,7 +123,9 @@ class World:
             if self.blocked[ny][nx] or self._zone_blocked_refcount[ny][nx] > 0:
                 continue
 
-            step_cost = factor * (self.base_cost + self.extra_cost[ny][nx] + self._zone_extra_cost[ny][nx])
+            step_cost = factor * (
+                self.base_cost + self.extra_cost[ny][nx] + self._zone_extra_cost[ny][nx]
+            )
             result.append((Position(nx, ny), step_cost))
 
         return result
@@ -181,7 +185,9 @@ class World:
         elif extra_cost != DEFAULT_EXTRA_COST:
             raise ValueError("extra_cost can only be used for slow zones.")
 
-        expires_at_tick = None if duration_ticks is None else current_tick + duration_ticks
+        expires_at_tick = (
+            None if duration_ticks is None else current_tick + duration_ticks
+        )
         zone_id = self._next_zone_id
         self._next_zone_id += 1
 

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Literal
 
 from core.planning import Planner
@@ -37,10 +36,21 @@ class RunResult:
     stalled: bool | None = None
     run_metrics: dict[str, int | float | bool | str | None] | None = None
 
-    def to_dict(self) -> dict[str, int | float | bool | str | None | dict[str, int | float | bool | str | None]]:
+    def to_dict(
+        self,
+    ) -> dict[
+        str,
+        int | float | bool | str | None | dict[str, int | float | bool | str | None],
+    ]:
         payload = asdict(self)
-        payload["goal_reached"] = self.goal_reached if self.goal_reached is not None else self.reason == "goal_reached"
-        payload["stalled"] = self.stalled if self.stalled is not None else self.reason == "stalled"
+        payload["goal_reached"] = (
+            self.goal_reached
+            if self.goal_reached is not None
+            else self.reason == "goal_reached"
+        )
+        payload["stalled"] = (
+            self.stalled if self.stalled is not None else self.reason == "stalled"
+        )
         return payload
 
 
@@ -99,7 +109,13 @@ def run_tick(
             robot=engine.state.robot,
             reason="goal_reached",
         )
-        return TickResult(replanned=replanned, moved=moved, at_goal=True, done=True, reason="goal_reached")
+        return TickResult(
+            replanned=replanned,
+            moved=moved,
+            at_goal=True,
+            done=True,
+            reason="goal_reached",
+        )
 
     if not moved:
         engine.state.metrics.on_done(
@@ -108,9 +124,13 @@ def run_tick(
             robot=engine.state.robot,
             reason="stalled",
         )
-        return TickResult(replanned=replanned, moved=False, at_goal=False, done=True, reason="stalled")
+        return TickResult(
+            replanned=replanned, moved=False, at_goal=False, done=True, reason="stalled"
+        )
 
-    return TickResult(replanned=replanned, moved=True, at_goal=False, done=False, reason="running")
+    return TickResult(
+        replanned=replanned, moved=True, at_goal=False, done=False, reason="running"
+    )
 
 
 def run_until_done(
@@ -141,7 +161,8 @@ def run_until_done(
         if tick.done:
             return RunResult(
                 scenario_name=scenario_name,
-                policy_name=policy_name or type(replan_policy or EventBasedReplanPolicy()).__name__,
+                policy_name=policy_name
+                or type(replan_policy or EventBasedReplanPolicy()).__name__,
                 policy_params=policy_params,
                 policy_impl_module=policy_impl_module,
                 seed=seed,
@@ -163,7 +184,8 @@ def run_until_done(
     )
     return RunResult(
         scenario_name=scenario_name,
-        policy_name=policy_name or type(replan_policy or EventBasedReplanPolicy()).__name__,
+        policy_name=policy_name
+        or type(replan_policy or EventBasedReplanPolicy()).__name__,
         policy_params=policy_params,
         policy_impl_module=policy_impl_module,
         seed=seed,

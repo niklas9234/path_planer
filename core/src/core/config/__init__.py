@@ -17,4 +17,3 @@ __all__ = [
     "DEFAULT_ROBOT_SPEED_MPS",
     "CARDINAL_STEP_FACTOR",
 ]
-

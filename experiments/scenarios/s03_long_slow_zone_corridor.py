@@ -9,7 +9,7 @@ from core.experiments.scenarios import (
 
 def build() -> ScenarioDefinition:
     return ScenarioDefinition(
-        name="s03_long_slow_zone_corridor",
+        name="03_long_slow_zone_corridor",
         policy_name="event_based",
         world_config=WorldConfig(width=12, height=3),
         start=Position(0, 1),

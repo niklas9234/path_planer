@@ -139,7 +139,6 @@ Erzeugte Artefakte:
 - `matrix_summary.csv` mit den Spalten `Scenario, Policy, total_cost, ticks, replans, goal_reached`
 - `matrix_summary.json` mit denselben aggregierten Daten
 - pro Run eine JSON-Datei `<scenario>__<policy>.json`
-- Szenario-Definitionen liegen getrennt in `experiments/scenarios/` (eine Datei pro Szenario)
 
 Optional kannst du u. a. Policies einschränken oder Parameter setzen:
 

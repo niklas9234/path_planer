@@ -9,7 +9,7 @@ from core.experiments.scenarios import (
 
 def build() -> ScenarioDefinition:
     return ScenarioDefinition(
-        name="s05_dynamic_obstacle_corridor",
+        name="05_dynamic_obstacle_corridor",
         policy_name="event_based",
         world_config=WorldConfig(width=12, height=3),
         start=Position(0, 1),

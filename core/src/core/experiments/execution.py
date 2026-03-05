@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Mapping
+from collections.abc import Mapping
+from typing import TYPE_CHECKING
 
 from core.domain import AddObstacle, AddZone, SetGoal
 
@@ -79,7 +80,9 @@ def run_once(
     moves = 0
 
     for _ in range(max_ticks):
-        for event in scenario.scheduled_events.get(engine.state.tick, ()):  # apply at current tick
+        for event in scenario.scheduled_events.get(
+            engine.state.tick, ()
+        ):  # apply at current tick
             engine.apply(event)
 
         engine.process_tick_updates()

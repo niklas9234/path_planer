@@ -59,11 +59,17 @@ def _run_with_policy(policy_name: str) -> dict[str, object]:
             "ticks": engine.state.tick,
         },
         "position": asdict(engine.state.robot.position),
-        "goal": asdict(engine.state.robot.goal) if engine.state.robot.goal is not None else None,
+        "goal": (
+            asdict(engine.state.robot.goal)
+            if engine.state.robot.goal is not None
+            else None
+        ),
     }
 
 
-def test_policy_selection_event_based_outperforms_static_once_when_path_is_cut() -> None:
+def test_policy_selection_event_based_outperforms_static_once_when_path_is_cut() -> (
+    None
+):
     static_once_first = _run_with_policy("static_once")
     event_based_first = _run_with_policy("event_based")
 

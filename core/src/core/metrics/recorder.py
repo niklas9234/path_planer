@@ -60,7 +60,9 @@ class MetricsRecorder:
                 continue
         return cost
 
-    def _update_path_metrics(self, tick: TickMetrics, world: World, robot: RobotState) -> None:
+    def _update_path_metrics(
+        self, tick: TickMetrics, world: World, robot: RobotState
+    ) -> None:
         remaining = self._remaining_path(robot)
         tick.path_length_current = len(remaining)
         tick.path_cost_current = self._path_cost(world, robot)
@@ -197,18 +199,24 @@ class MetricsRecorder:
             step_cost=step_cost,
         )
 
-    def record_zone_added(self, *, tick: int, zone_type: object, cells: int, duration_ticks: int | None) -> None:
+    def record_zone_added(
+        self, *, tick: int, zone_type: object, cells: int, duration_ticks: int | None
+    ) -> None:
         del zone_type, cells, duration_ticks
         self._current_tick(tick)
 
-    def record_zone_expiration(self, *, tick: int, obstacle_cells: int, cost_cells: int) -> None:
+    def record_zone_expiration(
+        self, *, tick: int, obstacle_cells: int, cost_cells: int
+    ) -> None:
         current = self._current_tick(tick)
         if obstacle_cells or cost_cells:
             self.zone_expirations_total += 1
             current.zone_expirations = self.zone_expirations_total
 
     def finalize_run_metrics(self) -> dict[str, int | float | bool | str | None]:
-        goal_tick = next((item.ticks_to_goal for item in self.ticks if item.goal_reached), None)
+        goal_tick = next(
+            (item.ticks_to_goal for item in self.ticks if item.goal_reached), None
+        )
         final_path_len = self.ticks[-1].path_length_current if self.ticks else 0
         final_path_cost = self.ticks[-1].path_cost_current if self.ticks else 0.0
 
@@ -233,5 +241,9 @@ class MetricsRecorder:
             "no_path_events": self.no_path_events_total,
             "obstacle_changes": self.obstacle_changes_total,
             "zone_expirations": self.zone_expirations_total,
-            "mean_path_length_current": mean([item.path_length_current for item in self.ticks]) if self.ticks else 0.0,
+            "mean_path_length_current": (
+                mean([item.path_length_current for item in self.ticks])
+                if self.ticks
+                else 0.0
+            ),
         }

@@ -14,7 +14,9 @@ class RobotState:
     path_index: int = 0
     speed_mps: float = 1.0
     planned_cost_by_cell: dict[Position, float] = field(default_factory=dict)
-    _remaining_path_set: set[Position] = field(default_factory=set, init=False, repr=False)
+    _remaining_path_set: set[Position] = field(
+        default_factory=set, init=False, repr=False
+    )
 
     def __post_init__(self) -> None:
         if self.path is None:
@@ -55,9 +57,13 @@ class RobotState:
         self.planned_cost_by_cell.clear()
         self._rebuild_remaining_path_set()
 
-    def set_planned_cost_signature(self, planned_cost_by_cell: dict[Position, float]) -> None:
+    def set_planned_cost_signature(
+        self, planned_cost_by_cell: dict[Position, float]
+    ) -> None:
         self.planned_cost_by_cell = {
-            pos: cost for pos, cost in planned_cost_by_cell.items() if pos in self._remaining_path_set
+            pos: cost
+            for pos, cost in planned_cost_by_cell.items()
+            if pos in self._remaining_path_set
         }
 
     def next_waypoint(self) -> Position | None:

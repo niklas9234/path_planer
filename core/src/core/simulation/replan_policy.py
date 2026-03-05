@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Mapping, Protocol
+from typing import Any, Protocol
 
 from core.domain import Position, RobotState, World
 from core.simulation.state import SimulationState
@@ -161,7 +162,9 @@ class PathAffectedReplanPolicy:
         return decision.replan, decision.reason
 
 
-def make_policy(policy_name: str, policy_params: Mapping[str, Any] | None = None) -> ReplanPolicy:
+def make_policy(
+    policy_name: str, policy_params: Mapping[str, Any] | None = None
+) -> ReplanPolicy:
     params = dict(policy_params or {})
     normalized = policy_name.strip().lower()
 

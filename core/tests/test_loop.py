@@ -7,9 +7,9 @@ from core.simulation import (
     NoReplanPolicy,
     PathAffectedReplanPolicy,
     PeriodicReplanPolicy,
-    StaticOnceReplanPolicy,
     SimulationEngine,
     SimulationState,
+    StaticOnceReplanPolicy,
     run_tick,
     run_until_done,
 )
