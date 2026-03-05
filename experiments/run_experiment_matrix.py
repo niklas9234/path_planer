@@ -13,6 +13,8 @@ from typing import Any
 def _bootstrap_pythonpath() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     core_src = repo_root / "core" / "src"
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
     if str(core_src) not in sys.path:
         sys.path.insert(0, str(core_src))
 
@@ -58,10 +60,10 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--periodic-interval",
         type=int,
-        default=None,
+        default=5,
         help=(
             "Interval passed to policy 'periodic' as interval=<n>. "
-            "Must be set explicitly when periodic is selected."
+            "Defaults to 5 when periodic is selected."
         ),
     )
     parser.add_argument(
@@ -75,10 +77,6 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _policy_params(policy: str, args: argparse.Namespace) -> dict[str, object]:
     if policy == "periodic":
-        if args.periodic_interval is None:
-            raise ValueError(
-                "Policy 'periodic' requires --periodic-interval to be set explicitly."
-            )
         return {"interval": args.periodic_interval}
     if policy == "path_affected":
         return {"cost_delta_threshold": args.path_affected_threshold}
