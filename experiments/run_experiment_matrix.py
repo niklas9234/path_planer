@@ -13,16 +13,15 @@ from typing import Any
 def _bootstrap_pythonpath() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     core_src = repo_root / "core" / "src"
-    for path in (repo_root, core_src):
-        path_str = str(path)
-        if path_str not in sys.path:
-            sys.path.insert(0, path_str)
+    if str(core_src) not in sys.path:
+        sys.path.insert(0, str(core_src))
 
 
 _bootstrap_pythonpath()
 
 from core.experiments.runner import run_scenario_experiment
-from experiments.scenarios.registry import required_scenarios
+from core.experiments.scenarios import required_scenarios
+
 
 DEFAULT_POLICIES = ("static_once", "event_based", "periodic", "path_affected")
 
@@ -116,22 +115,13 @@ def main(argv: list[str] | None = None) -> int:
             rows.append(row)
 
             filename = f"{summary['scenario']}__{summary['policy_name']}.json"
-            _write_json(
-                out_dir / filename, {"summary": summary, "snapshot": result.snapshot}
-            )
+            _write_json(out_dir / filename, {"summary": summary, "snapshot": result.snapshot})
 
     csv_path = out_dir / "matrix_summary.csv"
     with csv_path.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(
             fh,
-            fieldnames=[
-                "Scenario",
-                "Policy",
-                "total_cost",
-                "ticks",
-                "replans",
-                "goal_reached",
-            ],
+            fieldnames=["Scenario", "Policy", "total_cost", "ticks", "replans", "goal_reached"],
         )
         writer.writeheader()
         writer.writerows(rows)
