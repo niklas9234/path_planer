@@ -4,7 +4,7 @@ import hashlib
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from types import MappingProxyType
 from typing import Any
 
@@ -65,6 +65,6 @@ class RunContext:
             planner_name=planner_name,
             planner_params=frozen_planner_params,
             world_params=frozen_world_params,
-            started_at=started_at or datetime.now(UTC),
+            started_at=started_at or datetime.now(timezone.utc),
             core_version=core_version,
         )

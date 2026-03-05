@@ -5,7 +5,7 @@ import json
 import re
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import asdict, is_dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -23,7 +23,7 @@ def timestamped_filename(payload: dict[str, Any]) -> str:
     )
     scenario = _slugify(str(summary.get("scenario", "scenario")))
     policy = _slugify(str(summary.get("planner", summary.get("policy", "policy"))))
-    timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     return f"{scenario}__{policy}__{timestamp}.json"
 
 
