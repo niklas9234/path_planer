@@ -140,12 +140,12 @@ Erzeugte Artefakte:
 - `matrix_summary.json` mit denselben aggregierten Daten
 - pro Run eine JSON-Datei `<scenario>__<policy>.json`
 
-Optional kannst du u. a. Policies einschränken oder Parameter setzen:
+Optional kannst du u. a. Policies einschränken oder Parameter setzen (für `periodic` muss `--periodic-interval` explizit gesetzt werden):
 
 ```bash
 python3 experiments/run_experiment_matrix.py \
   --policies static_once event_based periodic path_affected \
-  --periodic-interval 3 \
+  --periodic-interval 5 \
   --path-affected-threshold 0.0
 ```
 
