@@ -58,8 +58,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--periodic-interval",
         type=int,
-        default=3,
-        help="Interval passed to policy 'periodic' as interval=<n>.",
+        default=None,
+        help=(
+            "Interval passed to policy 'periodic' as interval=<n>. "
+            "Must be set explicitly when periodic is selected."
+        ),
     )
     parser.add_argument(
         "--path-affected-threshold",
@@ -72,6 +75,10 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _policy_params(policy: str, args: argparse.Namespace) -> dict[str, object]:
     if policy == "periodic":
+        if args.periodic_interval is None:
+            raise ValueError(
+                "Policy 'periodic' requires --periodic-interval to be set explicitly."
+            )
         return {"interval": args.periodic_interval}
     if policy == "path_affected":
         return {"cost_delta_threshold": args.path_affected_threshold}
@@ -93,7 +100,10 @@ def main(argv: list[str] | None = None) -> int:
 
     for scenario in required_scenarios():
         for policy in args.policies:
-            params = _policy_params(policy, args)
+            try:
+                params = _policy_params(policy, args)
+            except ValueError as exc:
+                parser.error(str(exc))
             result = run_scenario_experiment(
                 scenario_name=scenario.name,
                 planner=args.planner,
