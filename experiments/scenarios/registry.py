@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from core.experiments.scenarios import ScenarioDefinition
+
 from experiments.scenarios.blocked_goal_stalls import build as build_blocked_goal_stalls
 from experiments.scenarios.empty_world_reaches_goal import (
     build as build_empty_world_reaches_goal,

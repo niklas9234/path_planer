@@ -1,6 +1,12 @@
 from __future__ import annotations
 
-from core.domain.events import AddObstacle, AddZone, ClearExtraCost, SetExtraCost, SetGoal
+from core.domain.events import (
+    AddObstacle,
+    AddZone,
+    ClearExtraCost,
+    SetExtraCost,
+    SetGoal,
+)
 from core.domain.position import Position
 from core.domain.world import ZoneType
 from core.planning.astar import plan

@@ -3,10 +3,11 @@ from __future__ import annotations
 import csv
 import json
 import re
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import asdict, is_dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Callable, Iterable, Mapping
+from typing import Any
 
 FilenameStrategy = Callable[[dict[str, Any]], str]
 
@@ -17,10 +18,12 @@ def _slugify(value: str) -> str:
 
 
 def timestamped_filename(payload: dict[str, Any]) -> str:
-    summary = payload.get("summary") if isinstance(payload.get("summary"), Mapping) else {}
+    summary = (
+        payload.get("summary") if isinstance(payload.get("summary"), Mapping) else {}
+    )
     scenario = _slugify(str(summary.get("scenario", "scenario")))
     policy = _slugify(str(summary.get("planner", summary.get("policy", "policy"))))
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     return f"{scenario}__{policy}__{timestamp}.json"
 
 

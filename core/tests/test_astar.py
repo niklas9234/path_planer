@@ -3,7 +3,6 @@ from __future__ import annotations
 from math import isclose
 
 import pytest
-
 from core.domain import Position, World
 from core.planning import NoPath, plan
 

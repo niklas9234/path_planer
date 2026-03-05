@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 from core.experiments.execution import execute_scenario
 from core.experiments.results import ExperimentResult
@@ -17,7 +18,9 @@ from core.simulation.loop import RunResult
 
 
 def _load_core_version() -> str:
-    version_file = Path(__file__).resolve().parents[4] / "shared" / "protocol" / "VERSION"
+    version_file = (
+        Path(__file__).resolve().parents[4] / "shared" / "protocol" / "VERSION"
+    )
     return version_file.read_text(encoding="utf-8").strip()
 
 
@@ -115,20 +118,34 @@ def run_scenario_experiment(
         replans=run_result.replans,
         moves=run_result.moves,
         reason=run_result.reason,
-        goal_reached=run_result.goal_reached if run_result.goal_reached is not None else run_result.reason == "goal_reached",
+        goal_reached=(
+            run_result.goal_reached
+            if run_result.goal_reached is not None
+            else run_result.reason == "goal_reached"
+        ),
         total_cost=float(finalized.get("total_travel_cost", 0.0)),
     )
 
-    tick_metrics = [_tick_to_dict(item) for item in engine.state.metrics.ticks if item.tick > 0]
+    tick_metrics = [
+        _tick_to_dict(item) for item in engine.state.metrics.ticks if item.tick > 0
+    ]
 
     snapshot: dict[str, object] = {
         "meta": {"tick": run_result.ticks_executed, "scenario": scenario.name},
-        "world": {"width": scenario.world_config.width, "height": scenario.world_config.height},
+        "world": {
+            "width": scenario.world_config.width,
+            "height": scenario.world_config.height,
+        },
         "robot": {
-            "position": {"x": engine.state.robot.position.x, "y": engine.state.robot.position.y},
-            "goal": None
-            if engine.state.robot.goal is None
-            else {"x": engine.state.robot.goal.x, "y": engine.state.robot.goal.y},
+            "position": {
+                "x": engine.state.robot.position.x,
+                "y": engine.state.robot.position.y,
+            },
+            "goal": (
+                None
+                if engine.state.robot.goal is None
+                else {"x": engine.state.robot.goal.x, "y": engine.state.robot.goal.y}
+            ),
         },
     }
 
