@@ -10,7 +10,11 @@ if TYPE_CHECKING:
 from core.planning import Planner
 from core.planning.astar import NoPath
 from core.simulation import ReplanPolicy, SimulationEngine, SimulationState, make_policy
+from core.simulation.replan_policy import PolicyContext
 from core.simulation.loop import RunResult
+
+def _policy_trigger_kind(policy: ReplanPolicy) -> str:
+    return type(policy).__name__
 
 
 def build_engine_for_scenario(scenario: ScenarioDefinition) -> SimulationEngine:
@@ -86,11 +90,15 @@ def run_once(
             engine.apply(event)
 
         engine.process_tick_updates()
-        should_replan, replan_reason = policy.should_replan(engine.state)
+        decision = policy.decide(PolicyContext.from_state(engine.state))
 
-        if should_replan:
+        if decision.replan:
             try:
-                replanned = engine.replan(planner, reason=replan_reason)
+                replanned = engine.replan(
+                    planner,
+                    allow_when_not_dirty=decision.allow_when_not_dirty,
+                    trigger_kind=_policy_trigger_kind(policy),
+                )
             except NoPath:
                 engine.state.metrics.on_done(
                     tick=engine.state.tick,
