@@ -105,14 +105,15 @@ class World:
         self.assert_in_bounds(pos.x, pos.y)
 
         deltas: list[tuple[int, int, float]] = [
-            (1, 0, CARDINAL_STEP_FACTOR),
+            ( 1, 0, CARDINAL_STEP_FACTOR),
             (-1, 0, CARDINAL_STEP_FACTOR),
-            (0, 1, CARDINAL_STEP_FACTOR),
-            (0, -1, CARDINAL_STEP_FACTOR),
-            (1, 1, self._diag_factor),
-            (1, -1, self._diag_factor),
-            (-1, 1, self._diag_factor),
-            (-1, -1, self._diag_factor),
+            ( 0, 1, CARDINAL_STEP_FACTOR),
+            ( 0,-1, CARDINAL_STEP_FACTOR),
+
+            ( 1, 1, DIAGONAL_STEP_FACTOR),
+            ( 1,-1, DIAGONAL_STEP_FACTOR),
+            (-1, 1, DIAGONAL_STEP_FACTOR),
+            (-1,-1, DIAGONAL_STEP_FACTOR),
         ]
 
         result: list[tuple[Position, float]] = []
