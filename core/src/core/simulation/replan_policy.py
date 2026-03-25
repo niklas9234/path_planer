@@ -11,7 +11,7 @@ from core.simulation.state import SimulationState
 @dataclass(frozen=True, slots=True)
 class PolicyDecision:
     replan: bool
-    reason: str | None = None
+    allow_when_not_dirty: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -58,8 +58,6 @@ class PolicyContext:
 class ReplanPolicy(Protocol):
     def decide(self, ctx: PolicyContext) -> PolicyDecision: ...
 
-    def should_replan(self, state: SimulationState) -> tuple[bool, str | None]: ...
-
 
 @dataclass(frozen=True, slots=True)
 class PeriodicReplanPolicy:
@@ -79,12 +77,8 @@ class PeriodicReplanPolicy:
         if not ctx.dirty_replan:
             return PolicyDecision(replan=False)
         if ctx.tick % self.interval == 0:
-            return PolicyDecision(replan=True, reason="periodic_dirty")
+            return PolicyDecision(replan=True)
         return PolicyDecision(replan=False)
-
-    def should_replan(self, state: SimulationState) -> tuple[bool, str | None]:
-        decision = self.decide(PolicyContext.from_state(state))
-        return decision.replan, decision.reason
 
 
 @dataclass(frozen=True, slots=True)
@@ -93,12 +87,8 @@ class EventBasedReplanPolicy:
         if not ctx.has_goal:
             return PolicyDecision(replan=False)
         if ctx.dirty_replan:
-            return PolicyDecision(replan=True, reason="event")
+            return PolicyDecision(replan=True)
         return PolicyDecision(replan=False)
-
-    def should_replan(self, state: SimulationState) -> tuple[bool, str | None]:
-        decision = self.decide(PolicyContext.from_state(state))
-        return decision.replan, decision.reason
 
 
 @dataclass(frozen=True, slots=True)
@@ -106,10 +96,6 @@ class NoReplanPolicy:
     def decide(self, ctx: PolicyContext) -> PolicyDecision:
         del ctx
         return PolicyDecision(replan=False)
-
-    def should_replan(self, state: SimulationState) -> tuple[bool, str | None]:
-        del state
-        return False, None
 
 
 @dataclass(slots=True)
@@ -128,11 +114,7 @@ class StaticOnceReplanPolicy:
         if not ctx.has_goal or not ctx.dirty_replan or self.planned_once:
             return PolicyDecision(replan=False)
         self.planned_once = True
-        return PolicyDecision(replan=True, reason="initial")
-
-    def should_replan(self, state: SimulationState) -> tuple[bool, str | None]:
-        decision = self.decide(PolicyContext.from_state(state))
-        return decision.replan, decision.reason
+        return PolicyDecision(replan=True)
 
 
 @dataclass(frozen=True, slots=True)
@@ -144,22 +126,18 @@ class PathAffectedReplanPolicy:
             return PolicyDecision(replan=False)
 
         if not ctx.planned_cost_by_cell:
-            return PolicyDecision(replan=True, reason="path_signature_missing")
+            return PolicyDecision(replan=True)
 
         for pos in ctx.remaining_path:
             if ctx.world.is_blocked(pos):
-                return PolicyDecision(replan=True, reason="path_blocked")
+                return PolicyDecision(replan=True)
             planned_cost = ctx.planned_cost_by_cell.get(pos)
             if planned_cost is None:
-                return PolicyDecision(replan=True, reason="path_signature_missing")
+                return PolicyDecision(replan=True)
             if ctx.world.get_cell_cost(pos) != planned_cost:
-                return PolicyDecision(replan=True, reason="path_cost_changed")
+                return PolicyDecision(replan=True)
 
         return PolicyDecision(replan=False)
-
-    def should_replan(self, state: SimulationState) -> tuple[bool, str | None]:
-        decision = self.decide(PolicyContext.from_state(state))
-        return decision.replan, decision.reason
 
 
 def make_policy(

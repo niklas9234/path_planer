@@ -116,6 +116,17 @@ def test_replan_without_new_event_is_noop() -> None:
     assert engine.state.robot.path == old_path
 
 
+
+
+def test_replan_can_run_when_not_dirty_if_explicitly_allowed() -> None:
+    engine = _make_engine()
+    engine.apply(SetGoal(goal=Position(2, 2)))
+
+    assert engine.replan(plan) is True
+    engine.state.dirty_replan = False
+
+    assert engine.replan(plan, allow_when_not_dirty=True) is True
+
 def test_event_during_running_path_can_continue_until_replan() -> None:
     engine = _make_engine()
     engine.apply(SetGoal(goal=Position(4, 4)))

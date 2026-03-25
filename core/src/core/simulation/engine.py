@@ -124,15 +124,21 @@ class SimulationEngine:
             self.state.replan_events.add("zone_expired")
         return obstacle_count, cost_count
 
-    def replan(self, planner: PlannerFn, *, reason: str | None = None) -> bool:
-        if not self.state.dirty_replan and reason != "periodic":
+    def replan(
+        self,
+        planner: PlannerFn,
+        *,
+        allow_when_not_dirty: bool = False,
+        trigger_kind: str | None = None,
+    ) -> bool:
+        if not self.state.dirty_replan and not allow_when_not_dirty:
             self.state.metrics.on_replan(
                 tick=self.state.tick,
                 replanned=False,
                 found_path=bool(self.state.robot.path),
                 world=self.state.world,
                 robot=self.state.robot,
-                reason=reason,
+                trigger_kind=trigger_kind,
             )
             return False
 
@@ -147,7 +153,7 @@ class SimulationEngine:
                 found_path=False,
                 world=self.state.world,
                 robot=self.state.robot,
-                reason=reason,
+                trigger_kind=trigger_kind,
             )
             return False
 
@@ -160,7 +166,7 @@ class SimulationEngine:
                 found_path=False,
                 world=self.state.world,
                 robot=self.state.robot,
-                reason=reason,
+                trigger_kind=trigger_kind,
             )
             raise
 
@@ -171,7 +177,7 @@ class SimulationEngine:
                 found_path=False,
                 world=self.state.world,
                 robot=self.state.robot,
-                reason=reason,
+                trigger_kind=trigger_kind,
             )
             raise NoPath(f"No path from {self.state.robot.position} to {goal}.")
 
@@ -192,7 +198,7 @@ class SimulationEngine:
             found_path=bool(result.path),
             world=self.state.world,
             robot=self.state.robot,
-            reason=reason,
+            trigger_kind=trigger_kind,
         )
         return True
 
@@ -204,10 +210,10 @@ class SimulationEngine:
                 found_path=bool(self.state.robot.path),
                 world=self.state.world,
                 robot=self.state.robot,
-                reason=None,
+                trigger_kind=None,
             )
             return False
-        return self.replan(planner, reason="event")
+        return self.replan(planner, trigger_kind="event")
 
     def step(self) -> bool:
         self.state.tick += 1

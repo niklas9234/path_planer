@@ -111,14 +111,14 @@ class MetricsRecorder:
         found_path: bool,
         world: World,
         robot: RobotState,
-        reason: str | None,
+        trigger_kind: str | None,
     ) -> None:
         current = self._current_tick(tick)
         if replanned:
             self.replan_count_total += 1
             current.replan_count = 1
-            self.last_replan_trigger_reason = reason
-            current.replan_trigger_reason = reason
+            self.last_replan_trigger_reason = trigger_kind
+            current.replan_trigger_reason = trigger_kind
             if not found_path:
                 self.no_path_events_total += 1
                 current.no_path_events = self.no_path_events_total
@@ -171,7 +171,7 @@ class MetricsRecorder:
         found_path: bool,
         world: World,
         robot: RobotState,
-        reason: str | None,
+        trigger_kind: str | None,
     ) -> None:
         self.on_replan(
             tick=tick,
@@ -179,7 +179,7 @@ class MetricsRecorder:
             found_path=found_path,
             world=world,
             robot=robot,
-            reason=reason,
+            trigger_kind=trigger_kind,
         )
 
     def record_step(

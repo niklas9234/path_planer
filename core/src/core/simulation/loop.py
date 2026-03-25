@@ -6,9 +6,16 @@ from typing import Literal
 from core.planning import Planner
 from core.planning.astar import NoPath
 from core.simulation.engine import SimulationEngine
-from core.simulation.replan_policy import EventBasedReplanPolicy, ReplanPolicy
+from core.simulation.replan_policy import (
+    EventBasedReplanPolicy,
+    PolicyContext,
+    ReplanPolicy,
+)
 
 RunReason = Literal["running", "goal_reached", "stalled", "max_ticks"]
+
+def _policy_trigger_kind(policy: ReplanPolicy) -> str:
+    return type(policy).__name__
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,10 +77,14 @@ def run_tick(
         zone_expired_cost_cells=cost_cells,
     )
 
-    should_replan, replan_reason = policy.should_replan(engine.state)
-    if should_replan:
+    decision = policy.decide(PolicyContext.from_state(engine.state))
+    if decision.replan:
         try:
-            replanned = engine.replan(planner, reason=replan_reason)
+            replanned = engine.replan(
+                planner,
+                allow_when_not_dirty=decision.allow_when_not_dirty,
+                trigger_kind=_policy_trigger_kind(policy),
+            )
         except NoPath:
             engine.state.metrics.on_done(
                 tick=engine.state.tick,
@@ -96,7 +107,7 @@ def run_tick(
             found_path=bool(engine.state.robot.path),
             world=engine.state.world,
             robot=engine.state.robot,
-            reason=None,
+            trigger_kind=None,
         )
 
     moved = engine.step()
