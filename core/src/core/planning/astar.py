@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import heapq
 from dataclasses import dataclass
-from math import inf, sqrt
+from math import inf
 
+from core.config.defaults import CARDINAL_STEP_FACTOR, DIAGONAL_STEP_FACTOR
 from core.domain import Position, World
 
 
@@ -22,7 +23,9 @@ class PlanResult:
 def _octile(a: Position, b: Position) -> float:
     dx = abs(a.x - b.x)
     dy = abs(a.y - b.y)
-    return (dx + dy) + (sqrt(2.0) - 2.0) * min(dx, dy)
+    cardinal = CARDINAL_STEP_FACTOR
+    diagonal = DIAGONAL_STEP_FACTOR
+    return cardinal * (dx + dy) + (diagonal - 2.0 * cardinal) * min(dx, dy)
 
 
 def _reconstruct_path(
