@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 from core.config.defaults import (
     CARDINAL_STEP_FACTOR,
@@ -15,7 +15,7 @@ from core.config.defaults import (
 from core.domain.position import Position
 
 
-class ZoneType(str, Enum):
+class ZoneType(StrEnum):
     OBSTACLE = "obstacle"
     SLOW = "slow"
 
