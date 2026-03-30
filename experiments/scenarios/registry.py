@@ -24,6 +24,9 @@ from experiments.scenarios.s07_complex_dynamic_maze import (
 from experiments.scenarios.s08_update_storm_corridor import (
     build as build_s08_update_storm_corridor,
 )
+from experiments.scenarios.s09_bridge_cutoff_offpath_noise import (
+    build as build_s09_bridge_cutoff_offpath_noise,
+)
 
 SCENARIO_BUILDERS = (
     build_s01_corridor_baseline,
@@ -33,7 +36,8 @@ SCENARIO_BUILDERS = (
     build_s05_dynamic_obstacle_corridor,
     build_s06_dynamic_zone_then_block,
     build_s07_complex_dynamic_maze,
-    build_s08_update_storm_corridor
+    build_s08_update_storm_corridor,
+    build_s09_bridge_cutoff_offpath_noise
 )
 
 

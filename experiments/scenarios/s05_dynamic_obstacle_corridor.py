@@ -22,7 +22,7 @@ def build() -> ScenarioDefinition:
                 extra_cost=10.0,
             ),
         ),
-        max_ticks=80,
+        max_ticks=250,
         scheduled_events={
             3: (AddObstacle(position=Position(6, 1)),),
         },

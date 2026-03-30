@@ -22,7 +22,7 @@ def build() -> ScenarioDefinition:
                 extra_cost=10.0,
             ),
         ),
-        max_ticks=60,
+        max_ticks=250,
         scheduled_events={},
         expectation=ScenarioExpectation(
             allowed_reasons=("goal_reached", "stalled", "max_ticks"),

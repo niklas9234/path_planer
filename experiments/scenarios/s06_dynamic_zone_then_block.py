@@ -15,7 +15,7 @@ def build() -> ScenarioDefinition:
         goal=Position(11, 1),
         initial_obstacles=(),
         initial_zones=(),
-        max_ticks=100,
+        max_ticks=250,
         scheduled_events={
             2: (
                 AddZone(

@@ -62,7 +62,7 @@ def build() -> ScenarioDefinition:
         goal=Position(27, 27),
         initial_obstacles=initial_obstacles,
         initial_zones=(),
-        max_ticks=800,
+        max_ticks=250,
         scheduled_events={
             # Long-lasting "middle route becomes expensive"
             20: (

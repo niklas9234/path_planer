@@ -1,0 +1,34 @@
+{
+  "summary": {
+    "scenario": "s09_bridge_cutoff_offpath_noise",
+    "planner": "astar",
+    "policy_name": "static_once",
+    "policy_params": {},
+    "ticks_executed": 9,
+    "replans": 1,
+    "moves": 8,
+    "reason": "stalled",
+    "goal_reached": false,
+    "total_cost": 8.0
+  },
+  "snapshot": {
+    "meta": {
+      "tick": 9,
+      "scenario": "s09_bridge_cutoff_offpath_noise"
+    },
+    "world": {
+      "width": 26,
+      "height": 18
+    },
+    "robot": {
+      "position": {
+        "x": 11,
+        "y": 12
+      },
+      "goal": {
+        "x": 22,
+        "y": 2
+      }
+    }
+  }
+}

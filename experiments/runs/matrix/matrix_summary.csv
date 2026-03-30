@@ -31,3 +31,7 @@ s08_update_storm_corridor,static_once,79.0,79,1,True
 s08_update_storm_corridor,event_based,79.0,79,29,True
 s08_update_storm_corridor,periodic,79.0,79,7,True
 s08_update_storm_corridor,path_affected,79.0,79,29,True
+s09_bridge_cutoff_offpath_noise,static_once,8.0,9,1,False
+s09_bridge_cutoff_offpath_noise,event_based,25.0,25,10,True
+s09_bridge_cutoff_offpath_noise,periodic,25.0,25,5,True
+s09_bridge_cutoff_offpath_noise,path_affected,25.0,25,2,True

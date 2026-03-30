@@ -15,7 +15,7 @@ def build() -> ScenarioDefinition:
         goal=Position(11, 1),
         initial_obstacles=(),
         initial_zones=(),
-        max_ticks=60,
+        max_ticks=250,
         scheduled_events={},
         expectation=ScenarioExpectation(
             allowed_reasons=("goal_reached", "stalled", "max_ticks"),

@@ -254,5 +254,37 @@
     "ticks": 79,
     "replans": 29,
     "goal_reached": true
+  },
+  {
+    "Scenario": "s09_bridge_cutoff_offpath_noise",
+    "Policy": "static_once",
+    "total_cost": 8.0,
+    "ticks": 9,
+    "replans": 1,
+    "goal_reached": false
+  },
+  {
+    "Scenario": "s09_bridge_cutoff_offpath_noise",
+    "Policy": "event_based",
+    "total_cost": 25.0,
+    "ticks": 25,
+    "replans": 10,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s09_bridge_cutoff_offpath_noise",
+    "Policy": "periodic",
+    "total_cost": 25.0,
+    "ticks": 25,
+    "replans": 5,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "s09_bridge_cutoff_offpath_noise",
+    "Policy": "path_affected",
+    "total_cost": 25.0,
+    "ticks": 25,
+    "replans": 2,
+    "goal_reached": true
   }
 ]
