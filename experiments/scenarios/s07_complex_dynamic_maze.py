@@ -102,7 +102,6 @@ def build() -> ScenarioDefinition:
             ),
         },
         expectation=ScenarioExpectation(
-            allowed_reasons=("goal_reached", "stalled", "max_ticks"),
             min_replans=1,
         ),
     )

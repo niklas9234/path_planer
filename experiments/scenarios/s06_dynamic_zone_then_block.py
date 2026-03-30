@@ -28,7 +28,6 @@ def build() -> ScenarioDefinition:
             4: (AddObstacle(position=Position(7, 1)),),
         },
         expectation=ScenarioExpectation(
-            allowed_reasons=("goal_reached", "stalled", "max_ticks"),
             min_replans=1,
         ),
     )

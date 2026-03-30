@@ -82,6 +82,7 @@ def _tick_to_dict(item: TickMetrics) -> dict[str, int | float | bool | str | Non
         "ticks_to_goal": item.ticks_to_goal,
         "no_path_events": item.no_path_events,
         "obstacle_changes": item.obstacle_changes,
+        "terminal_reason": item.terminal_reason,
     }
 
 
@@ -131,7 +132,11 @@ def run_scenario_experiment(
     ]
 
     snapshot: dict[str, object] = {
-        "meta": {"tick": run_result.ticks_executed, "scenario": scenario.name},
+        "meta": {
+            "tick": run_result.ticks_executed,
+            "scenario": scenario.name,
+            "reason": run_result.reason,
+        },
         "world": {
             "width": scenario.world_config.width,
             "height": scenario.world_config.height,

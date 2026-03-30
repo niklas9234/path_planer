@@ -53,6 +53,7 @@ def test_metrics_start_goal_obstacle_replanning_finalize() -> None:
     assert metrics["mean_step_cost"] == 1.0
     assert metrics["goal_reached"] is True
     assert metrics["ticks_to_goal"] == 3
+    assert metrics["terminal_reason"] == "goal_reached"
     assert metrics["no_path_events"] == 0
     assert metrics["obstacle_changes"] == 1
     assert metrics["zone_expirations"] == 0
@@ -71,6 +72,7 @@ def test_metrics_no_path_event_is_counted() -> None:
     assert result.run_metrics is not None
     assert result.run_metrics["replan_count"] == 1
     assert result.run_metrics["no_path_events"] == 1
+    assert result.run_metrics["terminal_reason"] == "stalled"
 
 
 def test_metrics_counts_zone_expiration() -> None:

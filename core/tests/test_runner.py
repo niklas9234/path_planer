@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from core.domain import AddObstacle, Position
-from core.experiments.runner import run_experiment
+from core.experiments.runner import run_experiment, run_scenario_experiment
 from core.experiments.scenarios import (
     ScenarioDefinition,
     ScenarioExpectation,
@@ -54,9 +54,7 @@ def test_periodic_runner_replans_minimally_without_changes_and_by_next_interval_
         max_ticks=8,
         policy_name="periodic",
         policy_params={"interval": 3},
-        expectation=ScenarioExpectation(
-            allowed_reasons=("goal_reached", "stalled", "max_ticks")
-        ),
+        expectation=ScenarioExpectation(),
     )
 
     no_change = ScenarioDefinition(
@@ -87,3 +85,9 @@ def test_run_result_tracks_policy_impl_module() -> None:
         result.to_export_dict()["run_result"]["policy_impl_module"]
         == "core.simulation.replan_policy"
     )
+
+
+def test_run_scenario_experiment_snapshot_meta_contains_reason() -> None:
+    result = run_scenario_experiment(scenario_name="s01_corridor_baseline")
+
+    assert result.snapshot["meta"]["reason"] == result.summary.reason

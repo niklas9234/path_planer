@@ -73,7 +73,7 @@ def test_static_once_includes_initial_replan() -> None:
         initial_zones=(),
         max_ticks=20,
         scheduled_events={},
-        expectation=ScenarioExpectation(allowed_reasons=("goal_reached", "stalled")),
+        expectation=ScenarioExpectation(),
         replan_mode="static_once",
     )
 
@@ -91,7 +91,7 @@ def test_policy_name_static_once_vs_event_based() -> None:
         initial_zones=(),
         max_ticks=20,
         scheduled_events={1: (AddObstacle(position=Position(0, 2)),)},
-        expectation=ScenarioExpectation(allowed_reasons=("goal_reached", "stalled")),
+        expectation=ScenarioExpectation(),
     )
     dynamic_scenario = ScenarioDefinition(
         name="pair_event_based",
@@ -128,9 +128,7 @@ def test_replan_mode_deprecated_mapping_and_policy_name_precedence() -> None:
         initial_zones=(),
         max_ticks=5,
         scheduled_events={},
-        expectation=ScenarioExpectation(
-            allowed_reasons=("goal_reached", "stalled", "max_ticks")
-        ),
+        expectation=ScenarioExpectation(),
     )
     assert mapped.policy_name == "static_once"
 
@@ -145,8 +143,6 @@ def test_replan_mode_deprecated_mapping_and_policy_name_precedence() -> None:
         initial_zones=(),
         max_ticks=5,
         scheduled_events={},
-        expectation=ScenarioExpectation(
-            allowed_reasons=("goal_reached", "stalled", "max_ticks")
-        ),
+        expectation=ScenarioExpectation(),
     )
     assert precedence.policy_name == "event_based"
