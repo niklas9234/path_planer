@@ -30,6 +30,7 @@ class TickMetrics:
     no_path_events: int = 0
     obstacle_changes: int = 0
     zone_expirations: int = 0
+    terminal_reason: str | None = None
 
 
 @dataclass(slots=True)
@@ -42,6 +43,7 @@ class MetricsRecorder:
     steps_taken_total: int = 0
     travel_cost_total: float = 0.0
     last_replan_trigger_reason: str | None = None
+    terminal_reason: str | None = None
 
     def _current_tick(self, tick: int) -> TickMetrics:
         if not self.ticks or self.ticks[-1].tick != tick:
@@ -153,8 +155,9 @@ class MetricsRecorder:
         robot: RobotState,
         reason: str,
     ) -> None:
-        del reason
         current = self._current_tick(tick)
+        self.terminal_reason = reason
+        current.terminal_reason = reason
         current.goal_reached = robot.at_goal()
         if current.goal_reached and current.ticks_to_goal is None:
             current.ticks_to_goal = tick
@@ -238,6 +241,7 @@ class MetricsRecorder:
             "mean_step_cost": (total_travel_cost / total_moves) if total_moves else 0.0,
             "goal_reached": any(item.goal_reached for item in self.ticks),
             "ticks_to_goal": goal_tick,
+            "terminal_reason": self.terminal_reason,
             "no_path_events": self.no_path_events_total,
             "obstacle_changes": self.obstacle_changes_total,
             "zone_expirations": self.zone_expirations_total,

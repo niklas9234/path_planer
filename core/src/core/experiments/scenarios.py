@@ -6,12 +6,11 @@ from typing import Literal
 from core.domain import DomainEvent, Position, ZoneType
 from core.experiments.execution import execute_scenario
 from core.planning import Planner, plan
-from core.simulation import RunReason, RunResult
+from core.simulation import RunResult
 
 
 @dataclass(frozen=True, slots=True)
 class ScenarioExpectation:
-    allowed_reasons: tuple[RunReason, ...]
     min_moves: int = 0
     max_moves: int | None = None
     min_replans: int = 0
