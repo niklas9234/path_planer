@@ -123,7 +123,14 @@ def main(argv: list[str] | None = None) -> int:
             rows.append(row)
 
             filename = f"{summary['scenario']}__{summary['policy_name']}.json"
-            _write_json(out_dir / filename, {"summary": summary, "snapshot": result.snapshot})
+            _write_json(
+                out_dir / filename,
+                {
+                    "summary": summary,
+                    "snapshot": result.snapshot,
+                    "trajectory": result.trajectory,
+                },
+            )
 
     csv_path = out_dir / "matrix_summary.csv"
     with csv_path.open("w", newline="", encoding="utf-8") as fh:
