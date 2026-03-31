@@ -30,9 +30,17 @@ from core.experiments.scenarios import ScenarioDefinition
 from experiments.scenarios.sf1_s01_baseline_reference import (
     build as build_sf1_s01_baseline_reference,
 )
+from experiments.scenarios.sf1_s02_on_path_obstacle_middle_gate import (
+    build as build_sf1_s02_on_path_obstacle_middle_gate,
+)
+from experiments.scenarios.sf1_s03_same_event_later_timing import (
+    build as build_sf1_s03_same_event_later_timing,
+)
 
 SCENARIO_BUILDERS = (
     build_sf1_s01_baseline_reference,
+    build_sf1_s02_on_path_obstacle_middle_gate,
+    build_sf1_s03_same_event_later_timing
     #build_s01_corridor_baseline,
     #build_s02_corridor_static,
     #build_s03_long_slow_zone_corridor,

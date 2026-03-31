@@ -1,34 +1,34 @@
 {
   "summary": {
-    "scenario": "05_dynamic_obstacle_corridor",
+    "scenario": "sf1_s03_same_event_later_timing",
     "planner": "astar",
     "policy_name": "static_once",
     "policy_params": {},
-    "ticks_executed": 6,
+    "ticks_executed": 17,
     "replans": 1,
-    "moves": 5,
+    "moves": 16,
     "reason": "stalled",
     "goal_reached": false,
-    "total_cost": 5.0
+    "total_cost": 16.0
   },
   "snapshot": {
     "meta": {
-      "tick": 6,
-      "scenario": "05_dynamic_obstacle_corridor",
+      "tick": 17,
+      "scenario": "sf1_s03_same_event_later_timing",
       "reason": "stalled"
     },
     "world": {
-      "width": 12,
-      "height": 3
+      "width": 28,
+      "height": 20
     },
     "robot": {
       "position": {
-        "x": 5,
-        "y": 1
+        "x": 12,
+        "y": 9
       },
       "goal": {
-        "x": 11,
-        "y": 1
+        "x": 25,
+        "y": 18
       }
     }
   }

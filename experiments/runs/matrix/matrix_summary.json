@@ -30,5 +30,69 @@
     "ticks": 31,
     "replans": 1,
     "goal_reached": true
+  },
+  {
+    "Scenario": "sf1_s02_on_path_obstacle_middle_gate",
+    "Policy": "static_once",
+    "total_cost": 16.0,
+    "ticks": 17,
+    "replans": 1,
+    "goal_reached": false
+  },
+  {
+    "Scenario": "sf1_s02_on_path_obstacle_middle_gate",
+    "Policy": "event_based",
+    "total_cost": 33.0,
+    "ticks": 33,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf1_s02_on_path_obstacle_middle_gate",
+    "Policy": "periodic",
+    "total_cost": 33.0,
+    "ticks": 33,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf1_s02_on_path_obstacle_middle_gate",
+    "Policy": "path_affected",
+    "total_cost": 33.0,
+    "ticks": 33,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf1_s03_same_event_later_timing",
+    "Policy": "static_once",
+    "total_cost": 16.0,
+    "ticks": 17,
+    "replans": 1,
+    "goal_reached": false
+  },
+  {
+    "Scenario": "sf1_s03_same_event_later_timing",
+    "Policy": "event_based",
+    "total_cost": 33.0,
+    "ticks": 33,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf1_s03_same_event_later_timing",
+    "Policy": "periodic",
+    "total_cost": 35.0,
+    "ticks": 35,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf1_s03_same_event_later_timing",
+    "Policy": "path_affected",
+    "total_cost": 33.0,
+    "ticks": 33,
+    "replans": 2,
+    "goal_reached": true
   }
 ]

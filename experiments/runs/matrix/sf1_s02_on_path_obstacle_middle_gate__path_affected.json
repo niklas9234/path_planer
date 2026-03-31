@@ -1,36 +1,36 @@
 {
   "summary": {
-    "scenario": "s09_bridge_cutoff_offpath_noise",
+    "scenario": "sf1_s02_on_path_obstacle_middle_gate",
     "planner": "astar",
     "policy_name": "path_affected",
     "policy_params": {
       "cost_delta_threshold": 0.0
     },
-    "ticks_executed": 25,
+    "ticks_executed": 33,
     "replans": 2,
-    "moves": 25,
+    "moves": 33,
     "reason": "goal_reached",
     "goal_reached": true,
-    "total_cost": 25.0
+    "total_cost": 33.0
   },
   "snapshot": {
     "meta": {
-      "tick": 25,
-      "scenario": "s09_bridge_cutoff_offpath_noise",
+      "tick": 33,
+      "scenario": "sf1_s02_on_path_obstacle_middle_gate",
       "reason": "goal_reached"
     },
     "world": {
-      "width": 26,
-      "height": 18
+      "width": 28,
+      "height": 20
     },
     "robot": {
       "position": {
-        "x": 22,
-        "y": 2
+        "x": 25,
+        "y": 18
       },
       "goal": {
-        "x": 22,
-        "y": 2
+        "x": 25,
+        "y": 18
       }
     }
   }

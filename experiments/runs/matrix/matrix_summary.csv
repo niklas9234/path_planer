@@ -3,3 +3,11 @@ sf1_s01_baseline_reference,static_once,31.0,31,1,True
 sf1_s01_baseline_reference,event_based,31.0,31,1,True
 sf1_s01_baseline_reference,periodic,31.0,31,1,True
 sf1_s01_baseline_reference,path_affected,31.0,31,1,True
+sf1_s02_on_path_obstacle_middle_gate,static_once,16.0,17,1,False
+sf1_s02_on_path_obstacle_middle_gate,event_based,33.0,33,2,True
+sf1_s02_on_path_obstacle_middle_gate,periodic,33.0,33,2,True
+sf1_s02_on_path_obstacle_middle_gate,path_affected,33.0,33,2,True
+sf1_s03_same_event_later_timing,static_once,16.0,17,1,False
+sf1_s03_same_event_later_timing,event_based,33.0,33,2,True
+sf1_s03_same_event_later_timing,periodic,35.0,35,2,True
+sf1_s03_same_event_later_timing,path_affected,33.0,33,2,True

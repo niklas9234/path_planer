@@ -1,34 +1,34 @@
 {
   "summary": {
-    "scenario": "s07_complex_dynamic_maze",
+    "scenario": "sf1_s03_same_event_later_timing",
     "planner": "astar",
     "policy_name": "event_based",
     "policy_params": {},
-    "ticks_executed": 30,
+    "ticks_executed": 33,
     "replans": 2,
-    "moves": 30,
+    "moves": 33,
     "reason": "goal_reached",
     "goal_reached": true,
-    "total_cost": 30.0
+    "total_cost": 33.0
   },
   "snapshot": {
     "meta": {
-      "tick": 30,
-      "scenario": "s07_complex_dynamic_maze",
+      "tick": 33,
+      "scenario": "sf1_s03_same_event_later_timing",
       "reason": "goal_reached"
     },
     "world": {
-      "width": 30,
-      "height": 30
+      "width": 28,
+      "height": 20
     },
     "robot": {
       "position": {
-        "x": 27,
-        "y": 27
+        "x": 25,
+        "y": 18
       },
       "goal": {
-        "x": 27,
-        "y": 27
+        "x": 25,
+        "y": 18
       }
     }
   }
