@@ -91,3 +91,10 @@ def test_run_scenario_experiment_snapshot_meta_contains_reason() -> None:
     result = run_scenario_experiment(scenario_name="s01_corridor_baseline")
 
     assert result.snapshot["meta"]["reason"] == result.summary.reason
+
+
+def test_run_scenario_experiment_exposes_non_empty_trajectory() -> None:
+    result = run_scenario_experiment(scenario_name="s01_corridor_baseline")
+
+    assert result.summary.goal_reached
+    assert result.trajectory

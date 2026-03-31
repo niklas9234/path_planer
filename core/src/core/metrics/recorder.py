@@ -44,6 +44,7 @@ class MetricsRecorder:
     travel_cost_total: float = 0.0
     last_replan_trigger_reason: str | None = None
     terminal_reason: str | None = None
+    trajectory: list[dict[str, int]] = field(default_factory=list)
 
     def _current_tick(self, tick: int) -> TickMetrics:
         if not self.ticks or self.ticks[-1].tick != tick:
@@ -69,6 +70,13 @@ class MetricsRecorder:
         tick.path_length_current = len(remaining)
         tick.path_cost_current = self._path_cost(world, robot)
 
+    def _position_to_dict(self, robot: RobotState) -> dict[str, int]:
+        return {"x": robot.position.x, "y": robot.position.y}
+
+    def _ensure_trajectory_initialized(self, robot: RobotState) -> None:
+        if not self.trajectory:
+            self.trajectory.append(self._position_to_dict(robot))
+
     def on_tick_start(
         self,
         *,
@@ -78,6 +86,7 @@ class MetricsRecorder:
         zone_expired_obstacle_cells: int = 0,
         zone_expired_cost_cells: int = 0,
     ) -> None:
+        self._ensure_trajectory_initialized(robot)
         current = self._current_tick(tick)
         if zone_expired_obstacle_cells or zone_expired_cost_cells:
             self.zone_expirations_total += 1
@@ -137,10 +146,12 @@ class MetricsRecorder:
         robot: RobotState,
         step_cost: float = 0.0,
     ) -> None:
+        self._ensure_trajectory_initialized(robot)
         current = self._current_tick(tick)
         if moved:
             self.steps_taken_total += 1
             self.travel_cost_total += step_cost
+            self.trajectory.append(self._position_to_dict(robot))
         current.steps_taken = self.steps_taken_total
         current.goal_reached = robot.at_goal()
         if current.goal_reached and current.ticks_to_goal is None:
@@ -155,6 +166,7 @@ class MetricsRecorder:
         robot: RobotState,
         reason: str,
     ) -> None:
+        self._ensure_trajectory_initialized(robot)
         current = self._current_tick(tick)
         self.terminal_reason = reason
         current.terminal_reason = reason

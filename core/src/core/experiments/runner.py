@@ -43,6 +43,7 @@ class ScenarioExperimentResult:
     summary: CliRunSummary
     tick_metrics: list[dict[str, int | float | bool | str | None]]
     snapshot: dict[str, object]
+    trajectory: list[dict[str, int]]
 
 
 def _scenario_by_name(name: str) -> ScenarioDefinition:
@@ -158,6 +159,7 @@ def run_scenario_experiment(
         summary=summary,
         tick_metrics=tick_metrics if include_tick_data else [],
         snapshot=snapshot,
+        trajectory=list(engine.state.metrics.trajectory),
     )
 
 
