@@ -1,0 +1,37 @@
+{
+  "summary": {
+    "scenario": "sf2_s01_persistent_on_path_slow_zone",
+    "planner": "astar",
+    "policy_name": "path_affected",
+    "policy_params": {
+      "cost_delta_threshold": 0.0
+    },
+    "ticks_executed": 34,
+    "replans": 2,
+    "moves": 34,
+    "reason": "goal_reached",
+    "goal_reached": true,
+    "total_cost": 34.0
+  },
+  "snapshot": {
+    "meta": {
+      "tick": 34,
+      "scenario": "sf2_s01_persistent_on_path_slow_zone",
+      "reason": "goal_reached"
+    },
+    "world": {
+      "width": 28,
+      "height": 20
+    },
+    "robot": {
+      "position": {
+        "x": 25,
+        "y": 18
+      },
+      "goal": {
+        "x": 25,
+        "y": 18
+      }
+    }
+  }
+}

@@ -11,3 +11,7 @@ sf1_s03_same_event_later_timing,static_once,16.0,17,1,False
 sf1_s03_same_event_later_timing,event_based,33.0,33,2,True
 sf1_s03_same_event_later_timing,periodic,35.0,35,2,True
 sf1_s03_same_event_later_timing,path_affected,33.0,33,2,True
+sf2_s01_persistent_on_path_slow_zone,static_once,81.0,31,1,True
+sf2_s01_persistent_on_path_slow_zone,event_based,34.0,34,2,True
+sf2_s01_persistent_on_path_slow_zone,periodic,34.0,34,2,True
+sf2_s01_persistent_on_path_slow_zone,path_affected,34.0,34,2,True
