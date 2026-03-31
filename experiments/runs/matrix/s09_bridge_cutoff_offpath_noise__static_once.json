@@ -14,7 +14,8 @@
   "snapshot": {
     "meta": {
       "tick": 9,
-      "scenario": "s09_bridge_cutoff_offpath_noise"
+      "scenario": "s09_bridge_cutoff_offpath_noise",
+      "reason": "stalled"
     },
     "world": {
       "width": 26,

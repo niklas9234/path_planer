@@ -16,7 +16,8 @@
   "snapshot": {
     "meta": {
       "tick": 11,
-      "scenario": "s06_dynamic_zone_then_block"
+      "scenario": "s06_dynamic_zone_then_block",
+      "reason": "goal_reached"
     },
     "world": {
       "width": 12,

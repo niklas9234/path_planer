@@ -1,36 +1,36 @@
 {
   "summary": {
-    "scenario": "s08_update_storm_corridor",
+    "scenario": "sf1_s01_baseline_reference",
     "planner": "astar",
     "policy_name": "periodic",
     "policy_params": {
       "interval": 5
     },
-    "ticks_executed": 79,
-    "replans": 7,
-    "moves": 79,
+    "ticks_executed": 31,
+    "replans": 1,
+    "moves": 31,
     "reason": "goal_reached",
     "goal_reached": true,
-    "total_cost": 79.0
+    "total_cost": 31.0
   },
   "snapshot": {
     "meta": {
-      "tick": 79,
-      "scenario": "s08_update_storm_corridor",
+      "tick": 31,
+      "scenario": "sf1_s01_baseline_reference",
       "reason": "goal_reached"
     },
     "world": {
-      "width": 80,
-      "height": 3
+      "width": 28,
+      "height": 20
     },
     "robot": {
       "position": {
-        "x": 79,
-        "y": 1
+        "x": 25,
+        "y": 18
       },
       "goal": {
-        "x": 79,
-        "y": 1
+        "x": 25,
+        "y": 18
       }
     }
   }

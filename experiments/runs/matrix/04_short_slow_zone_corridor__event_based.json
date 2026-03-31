@@ -14,7 +14,8 @@
   "snapshot": {
     "meta": {
       "tick": 11,
-      "scenario": "04_short_slow_zone_corridor"
+      "scenario": "04_short_slow_zone_corridor",
+      "reason": "goal_reached"
     },
     "world": {
       "width": 12,

@@ -14,7 +14,8 @@
   "snapshot": {
     "meta": {
       "tick": 11,
-      "scenario": "s02_corridor_static"
+      "scenario": "s02_corridor_static",
+      "reason": "goal_reached"
     },
     "world": {
       "width": 12,

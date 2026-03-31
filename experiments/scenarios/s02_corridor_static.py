@@ -20,7 +20,7 @@ def build() -> ScenarioDefinition:
             Position(7, 1),
         ),
         initial_zones=(),
-        max_ticks=250,
+        max_ticks=300,
         scheduled_events={},
         expectation=ScenarioExpectation(
             min_moves=1,

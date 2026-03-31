@@ -10,8 +10,9 @@ if TYPE_CHECKING:
 from core.planning import Planner
 from core.planning.astar import NoPath
 from core.simulation import ReplanPolicy, SimulationEngine, SimulationState, make_policy
-from core.simulation.replan_policy import PolicyContext
 from core.simulation.loop import RunResult
+from core.simulation.replan_policy import PolicyContext
+
 
 def _policy_trigger_kind(policy: ReplanPolicy) -> str:
     return type(policy).__name__

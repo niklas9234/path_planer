@@ -14,7 +14,8 @@
   "snapshot": {
     "meta": {
       "tick": 30,
-      "scenario": "s07_complex_dynamic_maze"
+      "scenario": "s07_complex_dynamic_maze",
+      "reason": "goal_reached"
     },
     "world": {
       "width": 30,

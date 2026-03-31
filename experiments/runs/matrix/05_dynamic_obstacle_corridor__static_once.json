@@ -14,7 +14,8 @@
   "snapshot": {
     "meta": {
       "tick": 6,
-      "scenario": "05_dynamic_obstacle_corridor"
+      "scenario": "05_dynamic_obstacle_corridor",
+      "reason": "stalled"
     },
     "world": {
       "width": 12,

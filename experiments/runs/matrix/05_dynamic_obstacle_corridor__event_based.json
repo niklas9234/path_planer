@@ -14,7 +14,8 @@
   "snapshot": {
     "meta": {
       "tick": 11,
-      "scenario": "05_dynamic_obstacle_corridor"
+      "scenario": "05_dynamic_obstacle_corridor",
+      "reason": "goal_reached"
     },
     "world": {
       "width": 12,
