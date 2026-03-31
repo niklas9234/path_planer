@@ -209,7 +209,7 @@ def build() -> ScenarioDefinition:
         goal=goal,
         initial_obstacles=initial_obstacles,
         initial_zones=(),
-        max_ticks=220,
+        max_ticks=300,
         scheduled_events={
             tick: tuple(events)
             for tick, events in scheduled_events.items()
