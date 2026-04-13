@@ -38,8 +38,8 @@ help:
 	@echo ""
 	@echo "  Run:"
 	@echo "    make backend-run       Run backend server (main.py in backend/)"
-	@echo "    make frontend-run      Run frontend dev server"
-	@echo "    make dev               Ruun both backend and frontend"
+	@echo "    make frontend-run      Run frontend dev server (if frontend/ exists)"
+	@echo "    make dev               Run backend and optional frontend"
 	@echo ""
 	@echo "  Quality:"
 	@echo "    make format            Format Python (black) and auto-fix lint (ruff)"
@@ -75,8 +75,12 @@ backend-run:
 
 .PHONY: frontend-run
 frontend-run:
-	@echo "Starting frontend..."
-	@cd $(FRONTEND_DIR) && npm run dev
+	@if [ -d "$(FRONTEND_DIR)" ]; then \
+		echo "Starting frontend..."; \
+		cd $(FRONTEND_DIR) && npm run dev; \
+	else \
+		echo "frontend/ not found; skipping (backend/core-only repository state)."; \
+	fi
 
 .PHONY: dev
 dev:
@@ -109,16 +113,16 @@ test:
 
 .PHONY: frontend-install
 frontend-install:
-	@cd $(FRONTEND_DIR) && npm install
+	@if [ -d "$(FRONTEND_DIR)" ]; then cd $(FRONTEND_DIR) && npm install; else echo "frontend/ not found"; fi
 
 .PHONY: frontend-lint
 frontend-lint:
-	@cd $(FRONTEND_DIR) && npm run lint
+	@if [ -d "$(FRONTEND_DIR)" ]; then cd $(FRONTEND_DIR) && npm run lint; else echo "frontend/ not found"; fi
 
 .PHONY: frontend-format
 frontend-format:
-	@cd $(FRONTEND_DIR) && npm run format
+	@if [ -d "$(FRONTEND_DIR)" ]; then cd $(FRONTEND_DIR) && npm run format; else echo "frontend/ not found"; fi
 
 .PHONY: frontend-test
 frontend-test:
-	@cd $(FRONTEND_DIR) && npm test
+	@if [ -d "$(FRONTEND_DIR)" ]; then cd $(FRONTEND_DIR) && npm test; else echo "frontend/ not found"; fi

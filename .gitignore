@@ -36,3 +36,10 @@ build/
 node_modules/
 npm-debug.log*
 yarn
+
+############################
+# Experiment artifacts
+############################
+experiments/temp/
+core/src/core/experiments/temp/
+experiments/runs/
