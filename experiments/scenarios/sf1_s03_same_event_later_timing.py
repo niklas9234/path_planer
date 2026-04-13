@@ -35,7 +35,6 @@ MIDDLE_GATE_CELLS = (
 def build() -> ScenarioDefinition:
     return ScenarioDefinition(
         name="sf1_s03_same_event_later_timing",
-        # Platzhalter: wird im Experimentlauf durch die jeweilige Policy ersetzt.
         policy_name="event_based",
         world_config=WorldConfig(width=WIDTH, height=HEIGHT),
         start=START,

@@ -126,5 +126,325 @@
     "ticks": 34,
     "replans": 2,
     "goal_reached": true
+  },
+  {
+    "Scenario": "sf2_s02_ttl_zone_same_position",
+    "Policy": "static_once",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf2_s02_ttl_zone_same_position",
+    "Policy": "event_based",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 3,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf2_s02_ttl_zone_same_position",
+    "Policy": "periodic",
+    "total_cost": 33.0,
+    "ticks": 33,
+    "replans": 3,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf2_s02_ttl_zone_same_position",
+    "Policy": "path_affected",
+    "total_cost": 34.0,
+    "ticks": 34,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf2_s03_pulse_zone_same_position",
+    "Policy": "static_once",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf2_s03_pulse_zone_same_position",
+    "Policy": "event_based",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 3,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf2_s03_pulse_zone_same_position",
+    "Policy": "periodic",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf2_s03_pulse_zone_same_position",
+    "Policy": "path_affected",
+    "total_cost": 34.0,
+    "ticks": 34,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf3_s01_single_off_path_zone",
+    "Policy": "static_once",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf3_s01_single_off_path_zone",
+    "Policy": "event_based",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 3,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf3_s01_single_off_path_zone",
+    "Policy": "periodic",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 3,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf3_s01_single_off_path_zone",
+    "Policy": "path_affected",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf3_s02_repeated_off_path_updates",
+    "Policy": "static_once",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf3_s02_repeated_off_path_updates",
+    "Policy": "event_based",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 9,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf3_s02_repeated_off_path_updates",
+    "Policy": "periodic",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 6,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf3_s02_repeated_off_path_updates",
+    "Policy": "path_affected",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf3_s03_distributed_off_path_update_storm",
+    "Policy": "static_once",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf3_s03_distributed_off_path_update_storm",
+    "Policy": "event_based",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 21,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf3_s03_distributed_off_path_update_storm",
+    "Policy": "periodic",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 6,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf3_s03_distributed_off_path_update_storm",
+    "Policy": "path_affected",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf4_s01_off_path_noise_then_on_path_obstacle",
+    "Policy": "static_once",
+    "total_cost": 16.0,
+    "ticks": 17,
+    "replans": 1,
+    "goal_reached": false
+  },
+  {
+    "Scenario": "sf4_s01_off_path_noise_then_on_path_obstacle",
+    "Policy": "event_based",
+    "total_cost": 35.0,
+    "ticks": 35,
+    "replans": 8,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf4_s01_off_path_noise_then_on_path_obstacle",
+    "Policy": "periodic",
+    "total_cost": 36.0,
+    "ticks": 36,
+    "replans": 4,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf4_s01_off_path_noise_then_on_path_obstacle",
+    "Policy": "path_affected",
+    "total_cost": 35.0,
+    "ticks": 35,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf4_s02_off_path_noise_then_on_path_slow_zone",
+    "Policy": "static_once",
+    "total_cost": 81.0,
+    "ticks": 31,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf4_s02_off_path_noise_then_on_path_slow_zone",
+    "Policy": "event_based",
+    "total_cost": 35.0,
+    "ticks": 35,
+    "replans": 9,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf4_s02_off_path_noise_then_on_path_slow_zone",
+    "Policy": "periodic",
+    "total_cost": 36.0,
+    "ticks": 36,
+    "replans": 5,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf4_s02_off_path_noise_then_on_path_slow_zone",
+    "Policy": "path_affected",
+    "total_cost": 35.0,
+    "ticks": 35,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf4_s03_near_path_zone_then_central_blockade",
+    "Policy": "static_once",
+    "total_cost": 16.0,
+    "ticks": 17,
+    "replans": 1,
+    "goal_reached": false
+  },
+  {
+    "Scenario": "sf4_s03_near_path_zone_then_central_blockade",
+    "Policy": "event_based",
+    "total_cost": 35.0,
+    "ticks": 35,
+    "replans": 4,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf4_s03_near_path_zone_then_central_blockade",
+    "Policy": "periodic",
+    "total_cost": 37.0,
+    "ticks": 37,
+    "replans": 4,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf4_s03_near_path_zone_then_central_blockade",
+    "Policy": "path_affected",
+    "total_cost": 35.0,
+    "ticks": 35,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf5_s01_shortcut_opens",
+    "Policy": "static_once",
+    "total_cost": 62.0,
+    "ticks": 32,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf5_s01_shortcut_opens",
+    "Policy": "event_based",
+    "total_cost": 38.0,
+    "ticks": 38,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf5_s01_shortcut_opens",
+    "Policy": "periodic",
+    "total_cost": 54.0,
+    "ticks": 44,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf5_s01_shortcut_opens",
+    "Policy": "path_affected",
+    "total_cost": 62.0,
+    "ticks": 32,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf5_s02_cost_disappears_on_alternative_route",
+    "Policy": "static_once",
+    "total_cost": 38.0,
+    "ticks": 38,
+    "replans": 1,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf5_s02_cost_disappears_on_alternative_route",
+    "Policy": "event_based",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf5_s02_cost_disappears_on_alternative_route",
+    "Policy": "periodic",
+    "total_cost": 31.0,
+    "ticks": 31,
+    "replans": 2,
+    "goal_reached": true
+  },
+  {
+    "Scenario": "sf5_s02_cost_disappears_on_alternative_route",
+    "Policy": "path_affected",
+    "total_cost": 38.0,
+    "ticks": 38,
+    "replans": 1,
+    "goal_reached": true
   }
 ]

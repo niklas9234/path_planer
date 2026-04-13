@@ -1,0 +1,105 @@
+{
+  "summary": {
+    "scenario": "sf4_s01_off_path_noise_then_on_path_obstacle",
+    "planner": "astar",
+    "policy_name": "static_once",
+    "policy_params": {},
+    "ticks_executed": 17,
+    "replans": 1,
+    "moves": 16,
+    "reason": "stalled",
+    "goal_reached": false,
+    "total_cost": 16.0
+  },
+  "snapshot": {
+    "meta": {
+      "tick": 17,
+      "scenario": "sf4_s01_off_path_noise_then_on_path_obstacle",
+      "reason": "stalled"
+    },
+    "world": {
+      "width": 28,
+      "height": 20
+    },
+    "robot": {
+      "position": {
+        "x": 12,
+        "y": 9
+      },
+      "goal": {
+        "x": 25,
+        "y": 18
+      }
+    }
+  },
+  "trajectory": [
+    {
+      "x": 2,
+      "y": 2
+    },
+    {
+      "x": 2,
+      "y": 2
+    },
+    {
+      "x": 2,
+      "y": 3
+    },
+    {
+      "x": 2,
+      "y": 4
+    },
+    {
+      "x": 2,
+      "y": 5
+    },
+    {
+      "x": 2,
+      "y": 6
+    },
+    {
+      "x": 2,
+      "y": 7
+    },
+    {
+      "x": 3,
+      "y": 8
+    },
+    {
+      "x": 4,
+      "y": 8
+    },
+    {
+      "x": 5,
+      "y": 8
+    },
+    {
+      "x": 6,
+      "y": 8
+    },
+    {
+      "x": 7,
+      "y": 8
+    },
+    {
+      "x": 8,
+      "y": 8
+    },
+    {
+      "x": 9,
+      "y": 8
+    },
+    {
+      "x": 10,
+      "y": 8
+    },
+    {
+      "x": 11,
+      "y": 9
+    },
+    {
+      "x": 12,
+      "y": 9
+    }
+  ]
+}
