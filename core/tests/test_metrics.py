@@ -13,6 +13,7 @@ from core.planning.astar import plan
 from core.simulation.engine import SimulationEngine
 from core.simulation.loop import run_tick, run_until_done
 from core.simulation.state import SimulationState
+from core.metrics.recorder import MetricsRecorder
 
 
 def _make_engine() -> SimulationEngine:
@@ -139,3 +140,15 @@ def test_metrics_travel_cost_handles_slowzone_clear() -> None:
     assert run_result.run_metrics is not None
     assert run_result.run_metrics["steps_taken"] == 3
     assert run_result.run_metrics["total_travel_cost"] == 3.0
+
+
+def test_metrics_recorder_does_not_expose_legacy_record_aliases() -> None:
+    recorder = MetricsRecorder()
+
+    for method_name in (
+        "record_apply_event",
+        "record_replan_result",
+        "record_step",
+        "record_zone_added",
+    ):
+        assert not hasattr(recorder, method_name)
