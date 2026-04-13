@@ -26,12 +26,14 @@ from core.experiments.scenarios import required_scenarios
 
 
 DEFAULT_POLICIES = ("static_once", "event_based", "periodic", "path_affected")
+DEFAULT_PERIODIC_INTERVAL = 5
+DEFAULT_PATH_AFFECTED_THRESHOLD = 0.0
 
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Run all required scenarios against selected policies and export "
+            "Run all required scenarios against the fixed policy matrix and export "
             "a consolidated result table (CSV + JSON)."
         ),
     )
@@ -40,46 +42,14 @@ def _build_parser() -> argparse.ArgumentParser:
         default="experiments/runs/matrix",
         help="Output directory for per-run files and aggregated table.",
     )
-    parser.add_argument(
-        "--planner",
-        default="astar",
-        help="Planner name (currently only 'astar' is supported).",
-    )
-    parser.add_argument(
-        "--max-ticks",
-        type=int,
-        default=None,
-        help="Optional max tick budget override for each run.",
-    )
-    parser.add_argument(
-        "--policies",
-        nargs="+",
-        default=list(DEFAULT_POLICIES),
-        help="Policies to execute (default: static_once event_based periodic path_affected).",
-    )
-    parser.add_argument(
-        "--periodic-interval",
-        type=int,
-        default=5,
-        help=(
-            "Interval passed to policy 'periodic' as interval=<n>. "
-            "Defaults to 5 when periodic is selected."
-        ),
-    )
-    parser.add_argument(
-        "--path-affected-threshold",
-        type=float,
-        default=0.0,
-        help="Threshold passed to policy 'path_affected' as cost_delta_threshold=<x>.",
-    )
     return parser
 
 
-def _policy_params(policy: str, args: argparse.Namespace) -> dict[str, object]:
+def _policy_params(policy: str) -> dict[str, object]:
     if policy == "periodic":
-        return {"interval": args.periodic_interval}
+        return {"interval": DEFAULT_PERIODIC_INTERVAL}
     if policy == "path_affected":
-        return {"cost_delta_threshold": args.path_affected_threshold}
+        return {"cost_delta_threshold": DEFAULT_PATH_AFFECTED_THRESHOLD}
     return {}
 
 
@@ -97,17 +67,14 @@ def main(argv: list[str] | None = None) -> int:
     rows: list[dict[str, object]] = []
 
     for scenario in required_scenarios():
-        for policy in args.policies:
-            try:
-                params = _policy_params(policy, args)
-            except ValueError as exc:
-                parser.error(str(exc))
+        for policy in DEFAULT_POLICIES:
+            params = _policy_params(policy)
             result = run_scenario_experiment(
                 scenario_name=scenario.name,
-                planner=args.planner,
+                planner="astar",
                 policy_name=policy,
                 policy_params=params,
-                max_ticks=args.max_ticks,
+                max_ticks=None,
                 include_tick_data=False,
             )
 
