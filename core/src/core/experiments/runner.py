@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 
 from core.experiments.execution import execute_scenario
@@ -15,13 +14,6 @@ from core.planning import plan
 from core.protocol.snapshots import SimulationSnapshot, SnapshotMeta
 from core.simulation import SimulationEngine
 from core.simulation.loop import RunResult
-
-
-def _load_core_version() -> str:
-    version_file = (
-        Path(__file__).resolve().parents[4] / "shared" / "protocol" / "VERSION"
-    )
-    return version_file.read_text(encoding="utf-8").strip()
 
 
 @dataclass(frozen=True, slots=True)
@@ -171,6 +163,12 @@ def run_experiment(
     world_params: Mapping[str, Any] | None = None,
     recorder: object | None = None,
 ) -> ExperimentResult:
+    # Legacy API: `run_experiment` is kept for backward-compatibility and tests.
+    # The actively used CLI code path calls `run_scenario_experiment`.
+    #
+    # We intentionally avoid filesystem-coupled version discovery here, because
+    # the old `shared/protocol/VERSION` path does not exist in this repository
+    # layout anymore.
     del recorder
 
     context = RunContext.create(
@@ -178,7 +176,7 @@ def run_experiment(
         planner_name=planner_name,
         planner_params=planner_params,
         world_params=world_params,
-        core_version=_load_core_version(),
+        core_version="legacy-unknown",
     )
 
     if planner_name != "astar":
