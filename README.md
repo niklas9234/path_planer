@@ -111,11 +111,10 @@ The system is designed according to the following principles:
 ## Repository Structure (Overview)
 
 ```
-frontend/          Frontend visualization and UI logic
-backend/           WebSocket server and application layer
-core/              Simulation, world model, and path planning
+backend/           Application entrypoint (adapter layer)
+core/              Simulation, world model, replanning, metrics, CSV export
 docs/              Documentation, diagrams, and thesis-related material
-docs/ticket-sys/   Lightweight ticket system used during development
+experiments/       Scenario definitions and matrix runner
 ```
 
 ---
@@ -139,6 +138,9 @@ Erzeugte Artefakte:
 - `matrix_summary.csv` mit den Spalten `Scenario, Policy, total_cost, ticks, replans, goal_reached`
 - `matrix_summary.json` mit denselben aggregierten Daten
 - pro Run eine JSON-Datei `<scenario>__<policy>.json`
+
+Hinweis: Laufartefakte unter `experiments/runs/` und temporäre Dateien unter `experiments/temp/`
+sind reine Ergebnisdateien und sollten nicht versioniert werden.
 
 Optional kannst du u. a. Policies einschränken oder Parameter setzen (für `periodic` muss `--periodic-interval` explizit gesetzt werden):
 
