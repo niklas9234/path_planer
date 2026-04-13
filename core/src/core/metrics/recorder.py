@@ -175,51 +175,6 @@ class MetricsRecorder:
             current.ticks_to_goal = tick
         self._update_path_metrics(current, world, robot)
 
-    def record_apply_event(self, *, tick: int, event: DomainEvent) -> None:
-        self.on_event_applied(tick=tick, event=event)
-
-    def record_replan_result(
-        self,
-        *,
-        tick: int,
-        replanned: bool,
-        found_path: bool,
-        world: World,
-        robot: RobotState,
-        trigger_kind: str | None,
-    ) -> None:
-        self.on_replan(
-            tick=tick,
-            replanned=replanned,
-            found_path=found_path,
-            world=world,
-            robot=robot,
-            trigger_kind=trigger_kind,
-        )
-
-    def record_step(
-        self,
-        *,
-        tick: int,
-        moved: bool,
-        world: World,
-        robot: RobotState,
-        step_cost: float = 0.0,
-    ) -> None:
-        self.on_step_executed(
-            tick=tick,
-            moved=moved,
-            world=world,
-            robot=robot,
-            step_cost=step_cost,
-        )
-
-    def record_zone_added(
-        self, *, tick: int, zone_type: object, cells: int, duration_ticks: int | None
-    ) -> None:
-        del zone_type, cells, duration_ticks
-        self._current_tick(tick)
-
     def record_zone_expiration(
         self, *, tick: int, obstacle_cells: int, cost_cells: int
     ) -> None:
